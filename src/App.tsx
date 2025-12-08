@@ -8,9 +8,12 @@ import LoginPage from "./pages/LoginPage";
 import Dashboard from "./pages/Dashboard";
 import MapPage from "./pages/MapPage";
 import DevicesPage from "./pages/DevicesPage";
+import DeviceDetailPage from "./pages/DeviceDetailPage";
 import EnterprisesPage from "./pages/EnterprisesPage";
 import UsersPage from "./pages/UsersPage";
 import SettingsPage from "./pages/SettingsPage";
+import ProfilePage from "./pages/ProfilePage";
+import AlertsPage from "./pages/AlertsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,8 +32,11 @@ const App = () => (
           <Route path="/devices" element={<DevicesPage />} />
           <Route path="/enterprises" element={<EnterprisesPage />} />
           <Route path="/users" element={<UsersPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
-          <Route path="*" element={<NotFound />} />
+            <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/alerts" element={<AlertsPage />} />
+            <Route path="/devices/:id" element={<DeviceDetailPage />} />
+            <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>

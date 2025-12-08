@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useAppStore, useAuthStore } from '@/lib/store';
 import { Button } from '@/components/ui/button';
@@ -20,15 +21,40 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Navigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import EnterpriseFormModal from '@/components/modals/EnterpriseFormModal';
+import ConfirmDeleteModal from '@/components/modals/ConfirmDeleteModal';
+import { Enterprise } from '@/lib/mock-data';
+import { toast } from 'sonner';
 
 const EnterprisesPage = () => {
   const { user } = useAuthStore();
-  const { enterprises } = useAppStore();
+  const { enterprises, deleteEnterprise } = useAppStore();
+  const [formModalOpen, setFormModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [selectedEnterprise, setSelectedEnterprise] = useState<Enterprise | null>(null);
 
   // Only admin and supervisor can access
   if (user?.role === 'operator') {
     return <Navigate to="/dashboard" replace />;
   }
+
+  const handleEdit = (enterprise: Enterprise) => {
+    setSelectedEnterprise(enterprise);
+    setFormModalOpen(true);
+  };
+
+  const handleDelete = (enterprise: Enterprise) => {
+    setSelectedEnterprise(enterprise);
+    setDeleteModalOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (selectedEnterprise) {
+      deleteEnterprise(selectedEnterprise.id);
+      toast.success('Entreprise supprimée');
+      setDeleteModalOpen(false);
+    }
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -56,7 +82,7 @@ const EnterprisesPage = () => {
               </p>
             </div>
             {user?.role === 'admin' && (
-              <Button variant="hero">
+              <Button variant="hero" onClick={() => { setSelectedEnterprise(null); setFormModalOpen(true); }}>
                 <Plus className="w-4 h-4 mr-2" />
                 Nouvelle entreprise
               </Button>
@@ -131,11 +157,11 @@ const EnterprisesPage = () => {
                               <Eye className="w-4 h-4 mr-2" />
                               Voir les détails
                             </DropdownMenuItem>
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleEdit(enterprise)}>
                               <Edit className="w-4 h-4 mr-2" />
                               Modifier
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="text-destructive">
+                            <DropdownMenuItem className="text-destructive" onClick={() => handleDelete(enterprise)}>
                               <Trash2 className="w-4 h-4 mr-2" />
                               Supprimer
                             </DropdownMenuItem>
@@ -150,6 +176,20 @@ const EnterprisesPage = () => {
           </div>
         </div>
       </div>
+
+      <EnterpriseFormModal 
+        open={formModalOpen} 
+        onClose={() => setFormModalOpen(false)} 
+        enterprise={selectedEnterprise}
+      />
+      
+      <ConfirmDeleteModal
+        open={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        onConfirm={confirmDelete}
+        title="Supprimer l'entreprise"
+        description={`Êtes-vous sûr de vouloir supprimer "${selectedEnterprise?.name}" ?`}
+      />
     </DashboardLayout>
   );
 };

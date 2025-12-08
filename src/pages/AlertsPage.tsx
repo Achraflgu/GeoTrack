@@ -1,0 +1,246 @@
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import { useAppStore, Alert } from '@/lib/store';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { 
+  Bell, 
+  Battery, 
+  Wifi, 
+  MapPin, 
+  Gauge, 
+  AlertTriangle, 
+  Search,
+  Check,
+  CheckCheck,
+  Trash2,
+  Filter
+} from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
+import { useState } from 'react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
+const AlertsPage = () => {
+  const { alerts, markAlertRead, markAllAlertsRead, deleteAlert } = useAppStore();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [typeFilter, setTypeFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
+
+  const getAlertIcon = (type: Alert['type']) => {
+    switch (type) {
+      case 'battery': return Battery;
+      case 'offline': return Wifi;
+      case 'geofence': return MapPin;
+      case 'speed': return Gauge;
+      case 'sos': return AlertTriangle;
+      default: return Bell;
+    }
+  };
+
+  const getSeverityColor = (severity: Alert['severity']) => {
+    switch (severity) {
+      case 'high': return 'bg-destructive/10 text-destructive border-destructive/20';
+      case 'medium': return 'bg-warning/10 text-warning border-warning/20';
+      case 'low': return 'bg-muted text-muted-foreground border-border';
+      default: return 'bg-muted text-muted-foreground border-border';
+    }
+  };
+
+  const getSeverityBadge = (severity: Alert['severity']) => {
+    switch (severity) {
+      case 'high': return <Badge className="bg-destructive text-destructive-foreground">Haute</Badge>;
+      case 'medium': return <Badge className="bg-warning text-warning-foreground">Moyenne</Badge>;
+      case 'low': return <Badge variant="secondary">Basse</Badge>;
+      default: return <Badge variant="secondary">{severity}</Badge>;
+    }
+  };
+
+  const getTypeName = (type: Alert['type']) => {
+    switch (type) {
+      case 'battery': return 'Batterie';
+      case 'offline': return 'Hors ligne';
+      case 'geofence': return 'Géofence';
+      case 'speed': return 'Vitesse';
+      case 'sos': return 'SOS';
+      default: return type;
+    }
+  };
+
+  const filteredAlerts = alerts.filter(alert => {
+    const matchesSearch = 
+      alert.deviceName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      alert.message.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesType = typeFilter === 'all' || alert.type === typeFilter;
+    const matchesStatus = 
+      statusFilter === 'all' || 
+      (statusFilter === 'unread' && !alert.read) ||
+      (statusFilter === 'read' && alert.read);
+    
+    return matchesSearch && matchesType && matchesStatus;
+  });
+
+  const unreadCount = alerts.filter(a => !a.read).length;
+
+  return (
+    <DashboardLayout>
+      <div className="h-screen flex flex-col">
+        {/* Header */}
+        <header className="px-6 py-4 border-b border-border/50 bg-card/50 backdrop-blur-sm">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h1 className="text-xl font-bold flex items-center gap-2">
+                <Bell className="w-6 h-6" />
+                Alertes
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                {alerts.length} alerte{alerts.length !== 1 ? 's' : ''} • {unreadCount} non lue{unreadCount !== 1 ? 's' : ''}
+              </p>
+            </div>
+            {unreadCount > 0 && (
+              <Button variant="outline" onClick={markAllAlertsRead}>
+                <CheckCheck className="w-4 h-4 mr-2" />
+                Tout marquer comme lu
+              </Button>
+            )}
+          </div>
+
+          <div className="flex items-center gap-4">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input 
+                placeholder="Rechercher..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 bg-secondary/50 border-0"
+              />
+            </div>
+            
+            <Select value={typeFilter} onValueChange={setTypeFilter}>
+              <SelectTrigger className="w-40 bg-secondary/50 border-0">
+                <Filter className="w-4 h-4 mr-2" />
+                <SelectValue placeholder="Type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tous les types</SelectItem>
+                <SelectItem value="battery">Batterie</SelectItem>
+                <SelectItem value="offline">Hors ligne</SelectItem>
+                <SelectItem value="geofence">Géofence</SelectItem>
+                <SelectItem value="speed">Vitesse</SelectItem>
+                <SelectItem value="sos">SOS</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-40 bg-secondary/50 border-0">
+                <SelectValue placeholder="Statut" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tous</SelectItem>
+                <SelectItem value="unread">Non lues</SelectItem>
+                <SelectItem value="read">Lues</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </header>
+
+        {/* Content */}
+        <div className="flex-1 overflow-auto p-6">
+          {filteredAlerts.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full text-center">
+              <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
+                <Bell className="w-8 h-8 text-muted-foreground" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2">Aucune alerte</h3>
+              <p className="text-muted-foreground max-w-md">
+                Toutes vos alertes apparaîtront ici.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {filteredAlerts.map((alert) => {
+                const Icon = getAlertIcon(alert.type);
+                return (
+                  <Card 
+                    key={alert.id}
+                    className={cn(
+                      "glass-card border transition-all cursor-pointer hover:shadow-md",
+                      getSeverityColor(alert.severity),
+                      !alert.read && "ring-2 ring-primary/20"
+                    )}
+                    onClick={() => markAlertRead(alert.id)}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-start gap-4">
+                        <div className={cn(
+                          "w-12 h-12 rounded-xl flex items-center justify-center shrink-0",
+                          alert.severity === 'high' && "bg-destructive/20",
+                          alert.severity === 'medium' && "bg-warning/20",
+                          alert.severity === 'low' && "bg-muted"
+                        )}>
+                          <Icon className="w-6 h-6" />
+                        </div>
+                        
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <h3 className="font-semibold">{alert.deviceName}</h3>
+                              <p className="text-sm text-muted-foreground">{alert.message}</p>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                              {getSeverityBadge(alert.severity)}
+                              <Badge variant="outline">{getTypeName(alert.type)}</Badge>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center justify-between mt-3">
+                            <p className="text-xs text-muted-foreground">
+                              {formatDistanceToNow(new Date(alert.timestamp), { 
+                                addSuffix: true, 
+                                locale: fr 
+                              })}
+                            </p>
+                            <div className="flex items-center gap-2">
+                              {!alert.read && (
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    markAlertRead(alert.id);
+                                  }}
+                                >
+                                  <Check className="w-4 h-4 mr-1" />
+                                  Marquer lu
+                                </Button>
+                              )}
+                              <Button 
+                                variant="ghost" 
+                                size="icon"
+                                className="text-destructive hover:text-destructive"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  deleteAlert(alert.id);
+                                }}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+    </DashboardLayout>
+  );
+};
+
+export default AlertsPage;

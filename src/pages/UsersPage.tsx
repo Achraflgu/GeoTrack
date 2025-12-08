@@ -1,6 +1,6 @@
+import { useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { useAuthStore } from '@/lib/store';
-import { mockUsers } from '@/lib/mock-data';
+import { useAuthStore, useAppStore } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -13,7 +13,7 @@ import {
   TableHeader, 
   TableRow 
 } from '@/components/ui/table';
-import { Plus, Search, MoreHorizontal, Eye, Edit, Trash2, Shield, UserCircle } from 'lucide-react';
+import { Plus, Search, MoreHorizontal, Edit, Trash2, Shield, UserCircle } from 'lucide-react';
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -22,14 +22,39 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Navigate } from 'react-router-dom';
 import { getRoleName, getRoleColor, formatDate } from '@/lib/utils-geo';
+import UserFormModal from '@/components/modals/UserFormModal';
+import ConfirmDeleteModal from '@/components/modals/ConfirmDeleteModal';
+import { User } from '@/lib/mock-data';
+import { toast } from 'sonner';
 
 const UsersPage = () => {
   const { user } = useAuthStore();
+  const { users, deleteUser } = useAppStore();
+  const [formModalOpen, setFormModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
-  // Only admin can access
   if (user?.role !== 'admin') {
     return <Navigate to="/dashboard" replace />;
   }
+
+  const handleEdit = (u: User) => {
+    setSelectedUser(u);
+    setFormModalOpen(true);
+  };
+
+  const handleDelete = (u: User) => {
+    setSelectedUser(u);
+    setDeleteModalOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (selectedUser) {
+      deleteUser(selectedUser.id);
+      toast.success('Utilisateur supprimé');
+      setDeleteModalOpen(false);
+    }
+  };
 
   const getRoleIcon = (role: string) => {
     switch (role) {
@@ -81,7 +106,7 @@ const UsersPage = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {mockUsers.map((u) => {
+                {users.map((u) => {
                   const RoleIcon = getRoleIcon(u.role);
                   return (
                     <TableRow key={u.id} className="border-border/50">
@@ -118,15 +143,11 @@ const UsersPage = () => {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem>
-                              <Eye className="w-4 h-4 mr-2" />
-                              Voir le profil
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleEdit(u)}>
                               <Edit className="w-4 h-4 mr-2" />
                               Modifier
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="text-destructive">
+                            <DropdownMenuItem className="text-destructive" onClick={() => handleDelete(u)}>
                               <Trash2 className="w-4 h-4 mr-2" />
                               Supprimer
                             </DropdownMenuItem>
@@ -141,6 +162,20 @@ const UsersPage = () => {
           </div>
         </div>
       </div>
+
+      <UserFormModal 
+        open={formModalOpen} 
+        onClose={() => setFormModalOpen(false)} 
+        user={selectedUser}
+      />
+      
+      <ConfirmDeleteModal
+        open={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        onConfirm={confirmDelete}
+        title="Supprimer l'utilisateur"
+        description={`Êtes-vous sûr de vouloir supprimer "${selectedUser?.name}" ?`}
+      />
     </DashboardLayout>
   );
 };

@@ -6,13 +6,17 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Search, Filter, Download, Grid3X3, List } from 'lucide-react';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import DeviceFormModal from '@/components/modals/DeviceFormModal';
 
 const DevicesPage = () => {
   const { user } = useAuthStore();
   const { getFilteredDevices, searchQuery, setSearchQuery, statusFilter, setStatusFilter, selectedDevice, setSelectedDevice } = useAppStore();
   const devices = getFilteredDevices();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [addModalOpen, setAddModalOpen] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <DashboardLayout>
@@ -30,7 +34,7 @@ const DevicesPage = () => {
               </p>
             </div>
             {user?.role === 'admin' && (
-              <Button variant="hero">
+              <Button variant="hero" onClick={() => setAddModalOpen(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Ajouter un véhicule
               </Button>
@@ -110,7 +114,7 @@ const DevicesPage = () => {
                   key={device.id}
                   device={device}
                   isSelected={selectedDevice?.id === device.id}
-                  onClick={() => setSelectedDevice(device)}
+                  onClick={() => navigate(`/devices/${device.id}`)}
                   compact={viewMode === 'list'}
                 />
               ))}
@@ -118,6 +122,11 @@ const DevicesPage = () => {
           )}
         </div>
       </div>
+
+      <DeviceFormModal 
+        open={addModalOpen} 
+        onClose={() => setAddModalOpen(false)} 
+      />
     </DashboardLayout>
   );
 };
