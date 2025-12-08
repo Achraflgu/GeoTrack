@@ -15,7 +15,9 @@ import {
   ChevronLeft,
   ChevronRight,
   Shield,
-  Radio
+  Radio,
+  Bell,
+  User
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -29,13 +31,17 @@ const Sidebar = () => {
     { to: '/devices', icon: Truck, label: 'Véhicules' },
     { to: '/enterprises', icon: Building2, label: 'Entreprises' },
     { to: '/users', icon: Users, label: 'Utilisateurs' },
+    { to: '/alerts', icon: Bell, label: 'Alertes' },
     { to: '/settings', icon: Settings, label: 'Paramètres' },
+    { to: '/profile', icon: User, label: 'Mon Profil' },
   ];
 
   const operatorLinks = [
     { to: '/dashboard', icon: LayoutDashboard, label: 'Tableau de bord' },
     { to: '/map', icon: MapPin, label: 'Carte temps réel' },
     { to: '/devices', icon: Truck, label: 'Ma flotte' },
+    { to: '/alerts', icon: Bell, label: 'Alertes' },
+    { to: '/profile', icon: User, label: 'Mon Profil' },
   ];
 
   const supervisorLinks = [
@@ -43,6 +49,8 @@ const Sidebar = () => {
     { to: '/map', icon: MapPin, label: 'Surveillance' },
     { to: '/devices', icon: Truck, label: 'Tous les véhicules' },
     { to: '/enterprises', icon: Building2, label: 'Entreprises' },
+    { to: '/alerts', icon: Bell, label: 'Alertes' },
+    { to: '/profile', icon: User, label: 'Mon Profil' },
   ];
 
   const getLinks = () => {
