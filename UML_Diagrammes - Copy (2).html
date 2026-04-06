@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoTrack — Diagramme de Cas d'Utilisation Spacieux</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: #eef2f6; 
+            padding: 40px; 
+            display: flex;
+            justify-content: center;
+        }
+        .canvas-container {
+            width: 1850px;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            padding: 40px;
+        }
+        h1 { 
+            font-size: 28px; 
+            text-align: center; 
+            margin-bottom: 30px; 
+            color: #1a1a2e;
+            font-weight: 700;
+        }
+        svg {
+            display: block;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+
+<div class="canvas-container">
+    <h1>Diagramme de Cas d'Utilisation — Plateforme GeoTrack</h1>
+
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1780 1300" width="1780" height="1300">
+        <!-- ════════ DEMONSTRATION & DEFS ════════ -->
+        <defs>
+            <!-- Include Arrow (dashed blue-ish but we keep monochrome, so black) -->
+            <marker id="arrInc" markerWidth="12" markerHeight="10" refX="11" refY="5" orient="auto">
+                <polygon points="0 0, 12 5, 0 10" fill="#000"/>
+            </marker>
+            <!-- Extend Arrow -->
+            <marker id="arrExt" markerWidth="12" markerHeight="10" refX="11" refY="5" orient="auto">
+                <polygon points="0 0, 12 5, 0 10" fill="none" stroke="#000" stroke-width="1.5"/>
+            </marker>
+            <!-- Generalization / Inheritance Arrow -->
+            <marker id="arrInherit" markerWidth="14" markerHeight="12" refX="13" refY="6" orient="auto">
+                <polygon points="0 0, 14 6, 0 12" fill="#fff" stroke="#000" stroke-width="2"/>
+            </marker>
+        </defs>
+
+        <!-- ════════ SYSTEM BOUNDARY ════════ -->
+        <rect x="330" y="30" width="1050" height="1220" rx="16" fill="#fafbfc" stroke="#333" stroke-width="2"/>
+        <text x="360" y="70" font-size="20" font-weight="700" fill="#111">Système : Plateforme GeoTrack</text>
+
+        <!-- ════════ SOLID LINES (Drawn first so ellipses cover them) ════════ -->
+        <g stroke="#444" stroke-width="1.5">
+            <!-- Utilisateur Connecté (120, 240) -->
+            <line x1="140" y1="240" x2="650" y2="100"/>
+            <line x1="140" y1="240" x2="650" y2="170"/>
+            <line x1="140" y1="240" x2="650" y2="240"/>
+            <line x1="140" y1="240" x2="650" y2="310"/>
+            <line x1="140" y1="240" x2="650" y2="380"/>
+
+            <!-- Administrateur (120, 515) -->
+            <line x1="140" y1="515" x2="650" y2="460"/>
+            <line x1="140" y1="515" x2="650" y2="530"/>
+            <line x1="140" y1="515" x2="650" y2="600"/>
+            <line x1="140" y1="515" x2="650" y2="670"/>
+
+            <!-- Superviseur (120, 635) -->
+            <line x1="140" y1="635" x2="650" y2="600"/>
+            <line x1="140" y1="635" x2="650" y2="670"/>
+
+            <!-- Opérateur (120, 820) -->
+            <line x1="140" y1="820" x2="650" y2="750"/>
+            <line x1="140" y1="820" x2="650" y2="820"/>
+            <line x1="140" y1="820" x2="650" y2="890"/>
+
+            <!-- Visiteur (120, 1085) -->
+            <line x1="140" y1="1085" x2="650" y2="980"/>
+            <line x1="140" y1="1085" x2="650" y2="1050"/>
+            <line x1="140" y1="1085" x2="650" y2="1120"/>
+            <line x1="140" y1="1085" x2="650" y2="1190"/>
+
+            <!-- Traceur GPS (1600, 240) -->
+            <line x1="1580" y1="240" x2="1150" y2="190"/>
+            <line x1="1580" y1="240" x2="1150" y2="290"/>
+
+            <!-- Système IA (1600, 1190) -->
+            <line x1="1580" y1="1190" x2="810" y2="1190"/>
+        </g>
+
+        <!-- ════════ INHERITANCE LINES ════════ -->
+        <!-- Backbone -->
+        <line x1="60" y1="240" x2="60" y2="820" stroke="#111" stroke-width="2"/>
+        <!-- Connection to Utilisateur Connecté -->
+        <line x1="60" y1="240" x2="95" y2="240" stroke="#111" stroke-width="2" marker-end="url(#arrInherit)"/>
+        <!-- Branches -->
+        <line x1="60" y1="515" x2="120" y2="515" stroke="#111" stroke-width="2"/>
+        <line x1="60" y1="635" x2="120" y2="635" stroke="#111" stroke-width="2"/>
+        <line x1="60" y1="820" x2="120" y2="820" stroke="#111" stroke-width="2"/>
+
+        <!-- ════════ DASHED INCLUDE / EXTEND LINES ════════ -->
+        <g stroke="#111" stroke-width="1.8" stroke-dasharray="8,6">
+            <!-- Suivre -> Recevoir -->
+            <line x1="810" y1="240" x2="975" y2="190" marker-end="url(#arrInc)"/>
+            <!-- Suivre -> Simuler -->
+            <line x1="810" y1="240" x2="975" y2="290" marker-end="url(#arrInc)"/>
+            <!-- Commandes -> Traitement Auto -->
+            <line x1="810" y1="460" x2="975" y2="460" marker-end="url(#arrInc)"/>
+            <!-- Zones -> Détecter -->
+            <line x1="810" y1="820" x2="975" y2="820" marker-end="url(#arrInc)"/>
+
+            <!-- Notification -> Alertes (Extend points towards base) -->
+            <line x1="990" y1="390" x2="825" y2="310" marker-end="url(#arrExt)"/>
+        </g>
+
+        <!-- ════════ USE CASES (ELLIPSES) ════════ -->
+        <!-- Center Column (X=650) -->
+        <g fill="#ffffff" stroke="#222" stroke-width="2">
+            <!-- Shared -->
+            <ellipse cx="650" cy="100" rx="160" ry="26"/>
+            <ellipse cx="650" cy="170" rx="160" ry="26"/>
+            <ellipse cx="650" cy="240" rx="160" ry="26"/>
+            <ellipse cx="650" cy="310" rx="160" ry="26"/>
+            <ellipse cx="650" cy="380" rx="160" ry="26"/>
+            <!-- Admin -->
+            <ellipse cx="650" cy="460" rx="160" ry="26"/>
+            <ellipse cx="650" cy="530" rx="160" ry="26"/>
+            <ellipse cx="650" cy="600" rx="160" ry="26"/>
+            <ellipse cx="650" cy="670" rx="160" ry="26"/>
+            <!-- Opérateur -->
+            <ellipse cx="650" cy="750" rx="160" ry="26"/>
+            <ellipse cx="650" cy="820" rx="160" ry="26"/>
+            <ellipse cx="650" cy="890" rx="160" ry="26"/>
+            <!-- Visiteur -->
+            <ellipse cx="650" cy="980" rx="160" ry="26"/>
+            <ellipse cx="650" cy="1050" rx="160" ry="26"/>
+            <ellipse cx="650" cy="1120" rx="160" ry="26"/>
+            <ellipse cx="650" cy="1190" rx="160" ry="26"/>
+        </g>
+
+        <!-- Right Column (X=1150) -->
+        <g fill="#fbfcfd" stroke="#222" stroke-width="1.5" stroke-dasharray="4,2">
+            <!-- Includes/Extends -->
+            <ellipse cx="1150" cy="190" rx="160" ry="26"/>
+            <ellipse cx="1150" cy="290" rx="160" ry="26"/>
+            <!-- Notification uses slightly different style to denote extend visually -->
+            <ellipse cx="1150" cy="390" rx="160" ry="26"/>
+            <ellipse cx="1150" cy="460" rx="160" ry="26"/>
+            <ellipse cx="1150" cy="820" rx="160" ry="26"/>
+        </g>
+
+        <!-- ════════ TEXT FOR USE CASES ════════ -->
+        <g text-anchor="middle" font-size="14" font-weight="600" fill="#111">
+            <!-- Center -->
+            <text x="650" y="105">S'authentifier (Login + OTP)</text>
+            <text x="650" y="175">Consulter Tableau de Bord</text>
+            <text x="650" y="245">Suivre Appareils Temps Réel</text>
+            <text x="650" y="315">Consulter Alertes</text>
+            <text x="650" y="385">Contacter Support (Tickets / Chat)</text>
+
+            <text x="650" y="465">Gérer Commandes</text>
+            <text x="650" y="535">Consulter Journal d'Audit</text>
+            <text x="650" y="605">Gérer Entreprises</text>
+            <text x="650" y="675">Gérer Utilisateurs</text>
+
+            <text x="650" y="755">Gérer Appareils GPS</text>
+            <text x="650" y="825">Configurer Zones GPS</text>
+            <text x="650" y="895">Gérer Facturation</text>
+
+            <text x="650" y="985">Consulter Landing Page</text>
+            <text x="650" y="1055">Accéder Mode Démo</text>
+            <text x="650" y="1125">Rejoindre / Passer Commande</text>
+            <text x="650" y="1195">Discuter avec Chatbot (Infos)</text>
+
+            <!-- Right -->
+            <text x="1150" y="195">Recevoir Données GPS</text>
+            <text x="1150" y="295">Simuler Positions GPS</text>
+            <text x="1150" y="395">Envoyer Notification Email</text>
+            <text x="1150" y="465">Traitement Automatique (Validation)</text>
+            <text x="1150" y="825">Détecter Franchissement Zone</text>
+        </g>
+
+        <!-- ════════ INCLUDE/EXTEND LABELS ════════ -->
+        <g font-size="13" font-weight="700" fill="#111" text-anchor="middle">
+            <rect x="850" y="200" width="80" height="20" fill="#fafbfc"/>
+            <text x="890" y="215">«include»</text>
+
+            <rect x="850" y="255" width="80" height="20" fill="#fafbfc"/>
+            <text x="890" y="270">«include»</text>
+
+            <rect x="850" y="450" width="80" height="20" fill="#fafbfc"/>
+            <text x="890" y="465">«include»</text>
+
+            <rect x="850" y="810" width="80" height="20" fill="#fafbfc"/>
+            <text x="890" y="825">«include»</text>
+
+            <rect x="850" y="325" width="80" height="20" fill="#fafbfc"/>
+            <text x="890" y="340">«extend»</text>
+            <text x="890" y="358" font-size="11" font-weight="400" font-style="italic">[alerte déclenchée]</text>
+        </g>
+
+        <!-- ════════ CONSTRAINT ANNOTATIONS ════════ -->
+        <g font-size="12" font-style="italic" fill="#333" text-anchor="middle">
+            <rect x="330" y="605" width="100" height="18" fill="#fff" stroke="#ccc" stroke-width="1"/>
+            <text x="380" y="618">[lecture seule]</text>
+
+            <rect x="320" y="642" width="100" height="18" fill="#fff" stroke="#ccc" stroke-width="1"/>
+            <text x="370" y="655">[lecture seule]</text>
+
+            <rect x="290" y="776" width="110" height="18" fill="#fff" stroke="#ccc" stroke-width="1"/>
+            <text x="345" y="789">[son entreprise]</text>
+        </g>
+
+        <!-- ════════ DRAW ACTORS (OVER LINES) ════════ -->
+        <!-- Utilisateur Connecté (120, 240) -->
+        <g transform="translate(120,240)">
+            <circle cx="0" cy="-35" r="14" fill="#fff" stroke="#111" stroke-width="2.5"/>
+            <line x1="0" y1="-21" x2="0" y2="15" stroke="#111" stroke-width="2.5"/>
+            <line x1="-20" y1="-5" x2="20" y2="-5" stroke="#111" stroke-width="2.5"/>
+            <line x1="0" y1="15" x2="-20" y2="45" stroke="#111" stroke-width="2.5"/>
+            <line x1="0" y1="15" x2="20" y2="45" stroke="#111" stroke-width="2.5"/>
+            <rect x="-70" y="55" width="140" height="20" fill="#eef2f6"/>
+            <text x="0" y="70" text-anchor="middle" font-size="14" font-weight="700" fill="#111">Utilisateur Connecté</text>
+            <text x="0" y="85" text-anchor="middle" font-size="11" fill="#666">« Acteur Abstrait »</text>
+        </g>
+
+        <!-- Administrateur (120, 515) -->
+        <g transform="translate(120,515)">
+            <circle cx="0" cy="-35" r="14" fill="#fff" stroke="#111" stroke-width="2.5"/>
+            <line x1="0" y1="-21" x2="0" y2="15" stroke="#111" stroke-width="2.5"/>
+            <line x1="-20" y1="-5" x2="20" y2="-5" stroke="#111" stroke-width="2.5"/>
+            <line x1="0" y1="15" x2="-20" y2="45" stroke="#111" stroke-width="2.5"/>
+            <line x1="0" y1="15" x2="20" y2="45" stroke="#111" stroke-width="2.5"/>
+            <rect x="-60" y="55" width="120" height="20" fill="#eef2f6"/>
+            <text x="0" y="70" text-anchor="middle" font-size="14" font-weight="700" fill="#111">Administrateur</text>
+        </g>
+
+        <!-- Superviseur (120, 635) -->
+        <g transform="translate(120,635)">
+            <circle cx="0" cy="-35" r="14" fill="#fff" stroke="#111" stroke-width="2.5"/>
+            <line x1="0" y1="-21" x2="0" y2="15" stroke="#111" stroke-width="2.5"/>
+            <line x1="-20" y1="-5" x2="20" y2="-5" stroke="#111" stroke-width="2.5"/>
+            <line x1="0" y1="15" x2="-20" y2="45" stroke="#111" stroke-width="2.5"/>
+            <line x1="0" y1="15" x2="20" y2="45" stroke="#111" stroke-width="2.5"/>
+            <rect x="-60" y="55" width="120" height="20" fill="#eef2f6"/>
+            <text x="0" y="70" text-anchor="middle" font-size="14" font-weight="700" fill="#111">Superviseur</text>
+        </g>
+
+        <!-- Opérateur (120, 820) -->
+        <g transform="translate(120,820)">
+            <circle cx="0" cy="-35" r="14" fill="#fff" stroke="#111" stroke-width="2.5"/>
+            <line x1="0" y1="-21" x2="0" y2="15" stroke="#111" stroke-width="2.5"/>
+            <line x1="-20" y1="-5" x2="20" y2="-5" stroke="#111" stroke-width="2.5"/>
+            <line x1="0" y1="15" x2="-20" y2="45" stroke="#111" stroke-width="2.5"/>
+            <line x1="0" y1="15" x2="20" y2="45" stroke="#111" stroke-width="2.5"/>
+            <rect x="-60" y="55" width="120" height="20" fill="#eef2f6"/>
+            <text x="0" y="70" text-anchor="middle" font-size="14" font-weight="700" fill="#111">Opérateur</text>
+        </g>
+
+        <!-- Visiteur (120, 1085) -->
+        <g transform="translate(120,1085)">
+            <circle cx="0" cy="-35" r="14" fill="#fff" stroke="#111" stroke-width="2.5"/>
+            <line x1="0" y1="-21" x2="0" y2="15" stroke="#111" stroke-width="2.5"/>
+            <line x1="-20" y1="-5" x2="20" y2="-5" stroke="#111" stroke-width="2.5"/>
+            <line x1="0" y1="15" x2="-20" y2="45" stroke="#111" stroke-width="2.5"/>
+            <line x1="0" y1="15" x2="20" y2="45" stroke="#111" stroke-width="2.5"/>
+            <rect x="-50" y="55" width="100" height="20" fill="#eef2f6"/>
+            <text x="0" y="70" text-anchor="middle" font-size="14" font-weight="700" fill="#111">Visiteur</text>
+            <text x="0" y="85" text-anchor="middle" font-size="11" fill="#666">« Espace Public »</text>
+        </g>
+
+        <!-- Traceur GPS (1600, 240) -->
+        <g transform="translate(1600,240)">
+            <rect x="-35" y="-35" width="70" height="60" rx="6" fill="#fff" stroke="#111" stroke-width="2.5"/>
+            <line x1="-20" y1="-15" x2="20" y2="-15" stroke="#111" stroke-width="2"/>
+            <line x1="-20" y1="-1" x2="20" y2="-1" stroke="#111" stroke-width="2"/>
+            <line x1="-20" y1="13" x2="0" y2="13" stroke="#111" stroke-width="2"/>
+            <circle cx="15" cy="13" r="5" fill="none" stroke="#111" stroke-width="2"/>
+            <rect x="-60" y="32" width="120" height="20" fill="#eef2f6"/>
+            <text x="0" y="48" text-anchor="middle" font-size="14" font-weight="700" fill="#111">Traceur GPS</text>
+            <text x="0" y="63" text-anchor="middle" font-size="11" fill="#666">« Appareil IoT »</text>
+        </g>
+
+        <!-- Système IA (1600, 1190) -->
+        <g transform="translate(1600,1190)">
+            <rect x="-35" y="-35" width="70" height="60" rx="6" fill="#fff" stroke="#111" stroke-width="2.5"/>
+            <text x="0" y="0" text-anchor="middle" font-size="24">🤖</text>
+            <text x="0" y="16" text-anchor="middle" font-size="10" font-weight="700" fill="#444">LLM</text>
+            <rect x="-70" y="32" width="140" height="20" fill="#eef2f6"/>
+            <text x="0" y="48" text-anchor="middle" font-size="14" font-weight="700" fill="#111">Système IA</text>
+            <text x="0" y="63" text-anchor="middle" font-size="11" fill="#666">« n8n / Ollama »</text>
+        </g>
+
+        <!-- ════════ LEGEND AT THE BOTTOM ════════ -->
+        <g transform="translate(560, 1260)">
+            <rect x="0" y="0" width="700" height="28" rx="4" fill="#fff" stroke="#ddd" stroke-width="1"/>
+            
+            <line x1="20" y1="14" x2="50" y2="14" stroke="#111" stroke-width="2"/>
+            <text x="58" y="19" font-size="13" fill="#111">Association directe</text>
+
+            <line x1="210" y1="14" x2="240" y2="14" stroke="#111" stroke-width="2" stroke-dasharray="6,4" marker-end="url(#arrInc)"/>
+            <text x="250" y="19" font-size="13" fill="#111" font-weight="700">«include»</text>
+
+            <line x1="340" y1="14" x2="370" y2="14" stroke="#111" stroke-width="2" stroke-dasharray="6,4" marker-end="url(#arrExt)"/>
+            <text x="380" y="19" font-size="13" fill="#111" font-weight="700">«extend»</text>
+
+            <path d="M 470 14 L 500 14" stroke="#111" stroke-width="2" marker-end="url(#arrInherit)"/>
+            <text x="510" y="19" font-size="13" fill="#111">Héritage d'acteur</text>
+        </g>
+    </svg>
+</div>
+
+</body>
+</html>

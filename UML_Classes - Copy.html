@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoTrack — Diagramme de Classes Complet</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,700;1,400&display=swap');
+        body { 
+            font-family: 'Roboto', sans-serif;
+            background: #eef2f6; 
+            padding: 40px; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .canvas-container {
+            width: 1700px;
+            background: #ffffff;
+            border-radius: 6px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            padding: 40px;
+        }
+        h1 { text-align: center; font-size: 28px; color: #111; margin-bottom: 40px; font-weight: 700; }
+        
+        svg { display: block; margin: 0 auto; background: #fff; }
+        .box { fill: #fcfcfc; stroke: #333; stroke-width: 1.5px; }
+        .header-bg { fill: #eaedf2; stroke: #333; stroke-width: 1.5px; }
+        .divider { stroke: #333; stroke-width: 1.5px; }
+        
+        .line { stroke: #333; stroke-width: 1.5px; fill: none; }
+        
+        .txt-title { font-weight: 700; font-size: 15px; text-anchor: middle; fill: #111; }
+        .txt-attr { font-size: 13.5px; fill: #222; }
+        
+        .lbl-bg { fill: white; opacity: 0.9; }
+        .lbl-txt { font-size: 12px; fill: #111; font-weight: 700; text-anchor: middle;}
+        .lbl-mult { font-size: 12px; fill: #111; font-weight: 700;}
+    </style>
+</head>
+<body>
+
+<div class="canvas-container">
+    <h1>Architecture Complète GeoTrack (Diagramme de Classes)</h1>
+    
+    <svg width="1620" height="960" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <!-- Aggregation (Empty Diamond) -->
+            <marker id="diamond" viewBox="0 0 20 12" refX="20" refY="6" markerWidth="16" markerHeight="10" orient="auto">
+                <polygon points="10,0 20,6 10,12 0,6" fill="white" stroke="#333" stroke-width="1.5" />
+            </marker>
+            <!-- Composition (Filled Diamond) -->
+            <marker id="diamond-filled" viewBox="0 0 20 12" refX="20" refY="6" markerWidth="16" markerHeight="10" orient="auto">
+                <polygon points="10,0 20,6 10,12 0,6" fill="#333" stroke="#333" stroke-width="1.5" />
+            </marker>
+            <!-- Directed Arrow -->
+            <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="10" markerHeight="10" orient="auto">
+                <path d="M 0 0 L 10 5 L 0 10" fill="none" stroke="#333" stroke-width="1.5" />
+            </marker>
+        </defs>
+
+        <!-- ======================= LIGNES DE RELATIONS ======================= -->
+        
+        <!-- Entreprise (Center Top 700, 50) -> Utilisateur (Left 150, 200) -->
+        <polyline points="700,120 400,120 400,200" class="line" marker-start="url(#diamond)" />
+        <rect x="520" y="105" width="80" height="20" class="lbl-bg" /><text x="560" y="120" class="lbl-txt">"Emploie"</text>
+        <text x="680" y="110" class="lbl-mult">1</text><text x="410" y="190" class="lbl-mult">1..*</text>
+
+        <!-- Entreprise (700, 50) -> TraceurGPS (Center 700, 420) -->
+        <line x1="820" y1="210" x2="820" y2="420" class="line" marker-start="url(#diamond)" />
+        <rect x="790" y="300" width="60" height="20" class="lbl-bg" /><text x="820" y="315" class="lbl-txt">"Gère"</text>
+        <text x="830" y="230" class="lbl-mult">1</text><text x="830" y="410" class="lbl-mult">0..*</text>
+
+        <!-- Entreprise (700, 50) -> Commande (Right 1200, 80) -->
+        <line x1="940" y1="130" x2="1200" y2="130" class="line" marker-start="url(#diamond-filled)" />
+        <rect x="1030" y="115" width="80" height="20" class="lbl-bg" /><text x="1070" y="130" class="lbl-txt">"Effectue"</text>
+        <text x="960" y="120" class="lbl-mult">1</text><text x="1170" y="120" class="lbl-mult">0..*</text>
+
+        <!-- Entreprise (700, 50) -> ZoneGPS (Right 1200, 420) -->
+        <polyline points="940,160 1000,160 1000,480 1200,480" class="line" marker-start="url(#diamond)" />
+        <rect x="965" y="320" width="70" height="20" class="lbl-bg" /><text x="1000" y="335" class="lbl-txt">"Définit"</text>
+        <text x="960" y="150" class="lbl-mult">1</text><text x="1170" y="470" class="lbl-mult">0..*</text>
+
+        <!-- TraceurGPS (700, 420) -> ZoneGPS (1200, 420) (Many to Many via geofence_devices) -->
+        <line x1="940" y1="520" x2="1200" y2="520" class="line" />
+        <rect x="1000" y="505" width="140" height="20" class="lbl-bg" /><text x="1070" y="520" class="lbl-txt">"Est surveillé par"</text>
+        <text x="960" y="510" class="lbl-mult">*</text><text x="1180" y="510" class="lbl-mult">*</text>
+
+        <!-- TraceurGPS (700, 420) -> HistoriquePosition (Bottom 400, 750) -->
+        <polyline points="750,600 750,820 640,820" class="line" marker-start="url(#diamond-filled)" />
+        <rect x="650" y="805" width="80" height="20" class="lbl-bg" /><text x="690" y="820" class="lbl-txt">"Produit"</text>
+        <text x="760" y="620" class="lbl-mult">1</text><text x="660" y="810" class="lbl-mult">0..*</text>
+
+        <!-- TraceurGPS (700, 420) -> Alerte (Bottom 1000, 750) -->
+        <polyline points="890,600 890,820 1000,820" class="line" marker-start="url(#diamond-filled)" />
+        <rect x="895" y="805" width="90" height="20" class="lbl-bg" /><text x="940" y="820" class="lbl-txt">"Déclenche"</text>
+        <text x="865" y="620" class="lbl-mult">1</text><text x="970" y="810" class="lbl-mult">0..*</text>
+
+        <!-- Utilisateur (150, 200) -> JournalAudit (Bottom Left 50, 600) -->
+        <line x1="270" y1="410" x2="270" y2="600" class="line" marker-start="url(#diamond)" />
+        <rect x="235" y="490" width="70" height="20" class="lbl-bg" /><text x="270" y="505" class="lbl-txt">"Trace"</text>
+        <text x="280" y="430" class="lbl-mult">1</text><text x="280" y="580" class="lbl-mult">0..*</text>
+
+        <!-- ======================= BOÎTES DE CLASSES ======================= -->
+
+        <!-- 1. Entreprise -->
+        <rect x="700" y="50" width="240" height="160" class="box" />
+        <rect x="700" y="50" width="240" height="35" class="header-bg" />
+        <text x="820" y="73" class="txt-title">Entreprise</text>
+        <line x1="700" y1="85" x2="940" y2="85" class="divider" />
+        <text x="710" y="105" class="txt-attr">- id: UUID</text>
+        <text x="710" y="125" class="txt-attr">- nom: String</text>
+        <text x="710" y="145" class="txt-attr">- contact_email: String</text>
+        <text x="710" y="165" class="txt-attr">- plan_abonnement: Plan</text>
+        <line x1="700" y1="175" x2="940" y2="175" class="divider" />
+        <text x="710" y="195" class="txt-attr">+ getAppareilsActifs(): Int</text>
+
+        <!-- 2. Utilisateur -->
+        <rect x="150" y="200" width="240" height="210" class="box" />
+        <rect x="150" y="200" width="240" height="35" class="header-bg" />
+        <text x="270" y="223" class="txt-title">Utilisateur</text>
+        <line x1="150" y1="235" x2="390" y2="235" class="divider" />
+        <text x="160" y="255" class="txt-attr">- id: UUID</text>
+        <text x="160" y="275" class="txt-attr">- nom: String</text>
+        <text x="160" y="295" class="txt-attr">- email: String</text>
+        <text x="160" y="315" class="txt-attr">- mot_de_passe: Hash</text>
+        <text x="160" y="335" class="txt-attr">- role: Enum(Admin,Sup,Op)</text>
+        <line x1="150" y1="345" x2="390" y2="345" class="divider" />
+        <text x="160" y="365" class="txt-attr">+ authentifier(mdp): Boolean</text>
+        <text x="160" y="385" class="txt-attr">+ resetMotDePasse()</text>
+        <text x="160" y="405" class="txt-attr">+ verifierAutorisation()</text>
+
+        <!-- 3. TraceurGPS -->
+        <rect x="700" y="420" width="240" height="180" class="box" />
+        <rect x="700" y="420" width="240" height="35" class="header-bg" />
+        <text x="820" y="443" class="txt-title">TraceurGPS (Appareil)</text>
+        <line x1="700" y1="455" x2="940" y2="455" class="divider" />
+        <text x="710" y="475" class="txt-attr">- id: UUID</text>
+        <text x="710" y="495" class="txt-attr">- imei: String</text>
+        <text x="710" y="515" class="txt-attr">- nom_vehicule: String</text>
+        <text x="710" y="535" class="txt-attr">- derniere_lat: Double</text>
+        <text x="710" y="555" class="txt-attr">- derniere_lng: Double</text>
+        <line x1="700" y1="565" x2="940" y2="565" class="divider" />
+        <text x="710" y="585" class="txt-attr">+ majTelemetry(payload)</text>
+
+        <!-- 4. ZoneGPS (Geofence) -->
+        <rect x="1200" y="420" width="240" height="160" class="box" />
+        <rect x="1200" y="420" width="240" height="35" class="header-bg" />
+        <text x="1320" y="443" class="txt-title">ZoneGPS (Geofence)</text>
+        <line x1="1200" y1="455" x2="1440" y2="455" class="divider" />
+        <text x="1210" y="475" class="txt-attr">- id: UUID</text>
+        <text x="1210" y="495" class="txt-attr">- nom: String</text>
+        <text x="1210" y="515" class="txt-attr">- type: Enum(Cercle, Polyg)</text>
+        <text x="1210" y="535" class="txt-attr">- details_polygone: JSON</text>
+        <line x1="1200" y1="545" x2="1440" y2="545" class="divider" />
+        <text x="1210" y="565" class="txt-attr">+ contientRoutier(lat, lng)</text>
+
+        <!-- 5. Commande (Order) -->
+        <rect x="1200" y="50" width="240" height="160" class="box" />
+        <rect x="1200" y="50" width="240" height="35" class="header-bg" />
+        <text x="1320" y="73" class="txt-title">Commande / Facture</text>
+        <line x1="1200" y1="85" x2="1440" y2="85" class="divider" />
+        <text x="1210" y="105" class="txt-attr">- id: UUID</text>
+        <text x="1210" y="125" class="txt-attr">- nb_gps_demandes: Int</text>
+        <text x="1210" y="145" class="txt-attr">- statut: String</text>
+        <text x="1210" y="165" class="txt-attr">- due_total: Double</text>
+        <line x1="1200" y1="175" x2="1440" y2="175" class="divider" />
+        <text x="1210" y="195" class="txt-attr">+ validerPaiement()</text>
+
+        <!-- 6. HistoriquePosition -->
+        <rect x="400" y="750" width="240" height="150" class="box" />
+        <rect x="400" y="750" width="240" height="35" class="header-bg" />
+        <text x="520" y="773" class="txt-title">HistoriquePosition</text>
+        <line x1="400" y1="785" x2="640" y2="785" class="divider" />
+        <text x="410" y="805" class="txt-attr">- id: UUID</text>
+        <text x="410" y="825" class="txt-attr">- location_lat: Double</text>
+        <text x="410" y="845" class="txt-attr">- location_lng: Double</text>
+        <text x="410" y="865" class="txt-attr">- timestamp: Timestamp</text>
+        <line x1="400" y1="875" x2="640" y2="875" class="divider" />
+        <text x="410" y="895" class="txt-attr">+ serialiserData()</text>
+
+        <!-- 7. Alerte -->
+        <rect x="1000" y="750" width="240" height="150" class="box" />
+        <rect x="1000" y="750" width="240" height="35" class="header-bg" />
+        <text x="1120" y="773" class="txt-title">Alerte Declenchée</text>
+        <line x1="1000" y1="785" x2="1240" y2="785" class="divider" />
+        <text x="1010" y="805" class="txt-attr">- id: UUID</text>
+        <text x="1010" y="825" class="txt-attr">- type: Enum(SOS, Vitesse)</text>
+        <text x="1010" y="845" class="txt-attr">- severite: Niveau</text>
+        <text x="1010" y="865" class="txt-attr">- message: String</text>
+        <line x1="1000" y1="875" x2="1240" y2="875" class="divider" />
+        <text x="1010" y="895" class="txt-attr">+ notifierAdmins()</text>
+
+        <!-- 8. JournalAudit -->
+        <rect x="150" y="600" width="240" height="160" class="box" />
+        <rect x="150" y="600" width="240" height="35" class="header-bg" />
+        <text x="270" y="623" class="txt-title">JournalAudit (Traçabilité)</text>
+        <line x1="150" y1="635" x2="390" y2="635" class="divider" />
+        <text x="160" y="655" class="txt-attr">- id: UUID</text>
+        <text x="160" y="675" class="txt-attr">- action: String</text>
+        <text x="160" y="695" class="txt-attr">- cible_id: UUID</text>
+        <text x="160" y="715" class="txt-attr">- adresse_ip: String</text>
+        <line x1="150" y1="725" x2="390" y2="725" class="divider" />
+        <text x="160" y="745" class="txt-attr">+ enregistrerAction()</text>
+
+    </svg>
+</div>
+
+</body>
+</html>

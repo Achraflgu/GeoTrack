@@ -4,31 +4,32 @@ import { useAppStore, useAuthStore } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
 } from '@/components/ui/table';
-import { Plus, Search, Building2, Truck, MoreHorizontal, Eye, Edit, Trash2 } from 'lucide-react';
-import { 
+import { Plus, Search, Building2, Radio, MoreHorizontal, Eye, Edit, Trash2 } from 'lucide-react';
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import EnterpriseFormModal from '@/components/modals/EnterpriseFormModal';
 import ConfirmDeleteModal from '@/components/modals/ConfirmDeleteModal';
-import { Enterprise } from '@/lib/mock-data';
+import { Enterprise } from '@/lib/types';
 import { toast } from 'sonner';
 
 const EnterprisesPage = () => {
   const { user } = useAuthStore();
   const { enterprises, deleteEnterprise } = useAppStore();
+  const navigate = useNavigate();
   const [formModalOpen, setFormModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedEnterprise, setSelectedEnterprise] = useState<Enterprise | null>(null);
@@ -91,7 +92,7 @@ const EnterprisesPage = () => {
 
           <div className="relative max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input 
+            <Input
               placeholder="Rechercher une entreprise..."
               className="pl-10 bg-secondary/50 border-0"
             />
@@ -106,7 +107,7 @@ const EnterprisesPage = () => {
                 <TableRow className="border-border/50 hover:bg-transparent">
                   <TableHead className="text-muted-foreground">Entreprise</TableHead>
                   <TableHead className="text-muted-foreground">Contact</TableHead>
-                  <TableHead className="text-muted-foreground">Véhicules</TableHead>
+                  <TableHead className="text-muted-foreground">Appareils</TableHead>
                   <TableHead className="text-muted-foreground">Statut</TableHead>
                   <TableHead className="text-muted-foreground">Date d'inscription</TableHead>
                   {user?.role === 'admin' && (
@@ -116,7 +117,11 @@ const EnterprisesPage = () => {
               </TableHeader>
               <TableBody>
                 {enterprises.map((enterprise) => (
-                  <TableRow key={enterprise.id} className="border-border/50">
+                  <TableRow
+                    key={enterprise.id}
+                    className="border-border/50 cursor-pointer hover:bg-secondary/50"
+                    onClick={() => navigate(`/enterprises/${enterprise.id}`)}
+                  >
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -134,7 +139,7 @@ const EnterprisesPage = () => {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <Truck className="w-4 h-4 text-muted-foreground" />
+                        <Radio className="w-4 h-4 text-muted-foreground" />
                         <span className="font-medium">{enterprise.deviceCount}</span>
                       </div>
                     </TableCell>
@@ -153,15 +158,15 @@ const EnterprisesPage = () => {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigate(`/enterprises/${enterprise.id}`); }}>
                               <Eye className="w-4 h-4 mr-2" />
                               Voir les détails
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleEdit(enterprise)}>
+                            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleEdit(enterprise); }}>
                               <Edit className="w-4 h-4 mr-2" />
                               Modifier
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="text-destructive" onClick={() => handleDelete(enterprise)}>
+                            <DropdownMenuItem className="text-destructive" onClick={(e) => { e.stopPropagation(); handleDelete(enterprise); }}>
                               <Trash2 className="w-4 h-4 mr-2" />
                               Supprimer
                             </DropdownMenuItem>
@@ -177,12 +182,12 @@ const EnterprisesPage = () => {
         </div>
       </div>
 
-      <EnterpriseFormModal 
-        open={formModalOpen} 
-        onClose={() => setFormModalOpen(false)} 
+      <EnterpriseFormModal
+        open={formModalOpen}
+        onClose={() => setFormModalOpen(false)}
         enterprise={selectedEnterprise}
       />
-      
+
       <ConfirmDeleteModal
         open={deleteModalOpen}
         onClose={() => setDeleteModalOpen(false)}

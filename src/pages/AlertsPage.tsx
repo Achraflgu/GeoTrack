@@ -1,5 +1,5 @@
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { useAppStore, Alert } from '@/lib/store';
+import { useAppStore, useAuthStore, Alert } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,19 +15,34 @@ import {
   Check,
   CheckCheck,
   Trash2,
-  Filter
+  Filter,
+  Building2
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Loader2 } from 'lucide-react';
 
 const AlertsPage = () => {
-  const { alerts, markAlertRead, markAllAlertsRead, deleteAlert } = useAppStore();
+  const { alerts, devices, enterprises, markAlertRead, markAllAlertsRead, deleteAlert } = useAppStore();
+  const { user } = useAuthStore();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const deviceIdParam = searchParams.get('deviceId');
+  const enterpriseIdParam = searchParams.get('enterpriseId');
+
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [displayedCount, setDisplayedCount] = useState(10);
+
+  // Reset pagination when filters change
+  useEffect(() => {
+    setDisplayedCount(10);
+  }, [searchQuery, typeFilter, statusFilter]);
+
 
   const getAlertIcon = (type: Alert['type']) => {
     switch (type) {
@@ -70,6 +85,14 @@ const AlertsPage = () => {
   };
 
   const filteredAlerts = alerts.filter(alert => {
+    // Active URL filters check
+    if (deviceIdParam && alert.deviceId !== deviceIdParam) return false;
+    
+    if (enterpriseIdParam) {
+      const device = devices.find(d => d.id === alert.deviceId || d.imei === alert.deviceId);
+      if (!device || device.enterpriseId !== enterpriseIdParam) return false;
+    }
+
     const matchesSearch = 
       alert.deviceName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       alert.message.toLowerCase().includes(searchQuery.toLowerCase());
@@ -82,7 +105,15 @@ const AlertsPage = () => {
     return matchesSearch && matchesType && matchesStatus;
   });
 
+  const visibleAlerts = filteredAlerts.slice(0, displayedCount);
   const unreadCount = alerts.filter(a => !a.read).length;
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const bottom = e.currentTarget.scrollHeight - e.currentTarget.scrollTop <= e.currentTarget.clientHeight + 100;
+    if (bottom && displayedCount < filteredAlerts.length) {
+      setDisplayedCount(prev => prev + 10);
+    }
+  };
 
   return (
     <DashboardLayout>
@@ -99,16 +130,19 @@ const AlertsPage = () => {
                 {alerts.length} alerte{alerts.length !== 1 ? 's' : ''} • {unreadCount} non lue{unreadCount !== 1 ? 's' : ''}
               </p>
             </div>
-            {unreadCount > 0 && (
-              <Button variant="outline" onClick={markAllAlertsRead}>
-                <CheckCheck className="w-4 h-4 mr-2" />
-                Tout marquer comme lu
-              </Button>
-            )}
+            <div className="flex gap-2">
+              {unreadCount > 0 && (
+                <Button variant="outline" onClick={markAllAlertsRead}>
+                  <CheckCheck className="w-4 h-4 mr-2" />
+                  Tout marquer comme lu
+                </Button>
+              )}
+            </div>
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className="relative flex-1 max-w-md">
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-4 flex-wrap">
+              <div className="relative flex-1 min-w-[200px] max-w-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input 
                 placeholder="Rechercher..."
@@ -117,6 +151,53 @@ const AlertsPage = () => {
                 className="pl-10 bg-secondary/50 border-0"
               />
             </div>
+
+            {/* Enterprise Filter */}
+            {user?.role !== 'operator' && (
+              <Select value={enterpriseIdParam || 'all'} onValueChange={(val) => {
+                  if(val === 'all') { searchParams.delete('enterpriseId'); } else { searchParams.set('enterpriseId', val); }
+                  searchParams.delete('deviceId'); // reset device when changing enterprise
+                  setSearchParams(searchParams);
+              }}>
+                <SelectTrigger className="w-56 bg-secondary/50 border-0">
+                  <Building2 className="w-4 h-4 mr-2" />
+                  <SelectValue placeholder="Entreprise" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Toutes les entreprises</SelectItem>
+                  {enterprises.map((ent) => (
+                    <SelectItem key={ent.id} value={ent.id}>
+                      {ent.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+
+            {/* Device Filter */}
+            <Select value={deviceIdParam || 'all'} onValueChange={(val) => {
+                if(val === 'all') searchParams.delete('deviceId'); else searchParams.set('deviceId', val);
+                setSearchParams(searchParams);
+            }}>
+              <SelectTrigger className="w-56 bg-secondary/50 border-0 truncate">
+                <MapPin className="w-4 h-4 mr-2 shrink-0" />
+                <SelectValue placeholder="Appareil" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tous les appareils</SelectItem>
+                {devices
+                  .filter(d => {
+                    if (user?.role === 'operator' && user.enterpriseId) return d.enterpriseId === user.enterpriseId;
+                    if (enterpriseIdParam) return d.enterpriseId === enterpriseIdParam;
+                    return true;
+                  })
+                  .map((dev) => (
+                  <SelectItem key={dev.id} value={dev.id}>
+                    {dev.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             
             <Select value={typeFilter} onValueChange={setTypeFilter}>
               <SelectTrigger className="w-40 bg-secondary/50 border-0">
@@ -144,10 +225,11 @@ const AlertsPage = () => {
               </SelectContent>
             </Select>
           </div>
+          </div>
         </header>
 
         {/* Content */}
-        <div className="flex-1 overflow-auto p-6">
+        <div className="flex-1 overflow-auto p-6 scroll-smooth" onScroll={handleScroll}>
           {filteredAlerts.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center">
               <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
@@ -160,11 +242,11 @@ const AlertsPage = () => {
             </div>
           ) : (
             <div className="space-y-3">
-              {filteredAlerts.map((alert) => {
+              {visibleAlerts.map((alert, idx) => {
                 const Icon = getAlertIcon(alert.type);
                 return (
                   <Card 
-                    key={alert.id}
+                    key={`${alert.id}-${idx}`}
                     className={cn(
                       "glass-card border transition-all cursor-pointer hover:shadow-md",
                       getSeverityColor(alert.severity),
@@ -235,10 +317,17 @@ const AlertsPage = () => {
                   </Card>
                 );
               })}
+              
+              {displayedCount < filteredAlerts.length && (
+                <div className="flex justify-center py-4">
+                  <Loader2 className="w-6 h-6 animate-spin text-muted-foreground/50" />
+                </div>
+              )}
             </div>
           )}
         </div>
       </div>
+
     </DashboardLayout>
   );
 };

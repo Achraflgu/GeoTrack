@@ -1,17 +1,31 @@
-import { LucideIcon, Car, Truck, Bike, Bus } from "lucide-react";
+import { LucideIcon, Radio, Wifi, MapPin, Cpu, Smartphone, Truck, Package, User, Container, Plane, Camera } from "lucide-react";
 
-export const getVehicleIcon = (type: string): LucideIcon => {
+export const getDeviceIcon = (type: string): LucideIcon => {
   switch (type) {
-    case 'truck':
+    case 'tracker':
+      return Radio;
+    case 'gps':
+      return MapPin;
+    case 'beacon':
+      return Wifi;
+    case 'sensor':
+      return Cpu;
+    case 'mobile':
+      return Smartphone;
+    case 'vehicle':
       return Truck;
-    case 'motorcycle':
-      return Bike;
-    case 'bus':
-      return Bus;
-    case 'van':
-      return Truck;
+    case 'asset':
+      return Package;
+    case 'personal':
+      return User;
+    case 'container':
+      return Container;
+    case 'drone':
+      return Plane;
+    case 'camera':
+      return Camera;
     default:
-      return Car;
+      return Radio;
   }
 };
 
@@ -27,6 +41,12 @@ export const getStatusColor = (status: string): string => {
       return 'bg-muted';
     case 'alert':
       return 'bg-destructive';
+    case 'stolen':
+      return 'bg-destructive text-destructive-foreground ring-2 ring-destructive ring-offset-2';
+    case 'lost':
+      return 'bg-orange-500 text-white';
+    case 'maintenance':
+      return 'bg-purple-500 text-white';
     default:
       return 'bg-muted';
   }
@@ -44,6 +64,12 @@ export const getStatusLabel = (status: string): string => {
       return 'Hors ligne';
     case 'alert':
       return 'Alerte';
+    case 'stolen':
+      return 'Volé';
+    case 'lost':
+      return 'Perdu';
+    case 'maintenance':
+      return 'En panne';
     default:
       return status;
   }
@@ -92,4 +118,31 @@ export const getRoleColor = (role: string): string => {
     default:
       return 'bg-muted text-muted-foreground';
   }
+};
+
+export const calculateTotalDistance = (points: { lat: number; lng: number }[]): number => {
+  if (points.length < 2) return 0;
+
+  let totalDistance = 0;
+  const R = 6371; // Earth's radius in km
+
+  for (let i = 0; i < points.length - 1; i++) {
+    const lat1 = points[i].lat;
+    const lon1 = points[i].lng;
+    const lat2 = points[i + 1].lat;
+    const lon2 = points[i + 1].lng;
+
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const d = R * c;
+
+    totalDistance += d;
+  }
+
+  return totalDistance;
 };

@@ -1,0 +1,87 @@
+{
+    "name": "GeoTrack Order Processing Email",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "order-process",
+                "responseMode": "lastNode",
+                "options": {}
+            },
+            "id": "order-webhook",
+            "name": "Order Process Webhook",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2,
+            "position": [
+                200,
+                300
+            ],
+            "webhookId": "order-process"
+        },
+        {
+            "parameters": {
+                "fromEmail": "noreply@geotrack.tn",
+                "toEmail": "={{ $json.body.email }}",
+                "subject": "=🎉 Bienvenue sur GeoTrack — Vos accès (Ref: {{ $json.body.orderRef }})",
+                "emailType": "html",
+                "html": "=<!DOCTYPE html><html><head><meta charset='utf-8'><style>body{font-family:'Segoe UI',Arial,sans-serif;background:#0a0a0a;color:#e5e5e5;margin:0;padding:0}.container{max-width:600px;margin:0 auto;padding:40px 20px}.header{text-align:center;padding:30px;background:linear-gradient(135deg,#00E599 0%,#00B377 100%);border-radius:16px 16px 0 0}.header h1{color:#000;margin:0;font-size:24px}.header p{color:#000;opacity:0.7;margin:5px 0 0}.content{background:#1a1a1a;padding:30px;border-radius:0 0 16px 16px;border:1px solid #333;border-top:0}.info-box{background:#222;border:1px solid #333;border-radius:12px;padding:20px;margin:20px 0}.info-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #333}.info-row:last-child{border-bottom:none}.info-label{color:#888}.info-value{color:#00E599;font-weight:bold}.btn{display:inline-block;background:#00E599;color:#000;padding:14px 32px;border-radius:10px;text-decoration:none;font-weight:bold;font-size:16px;margin:20px 0}.footer{text-align:center;padding:20px;color:#666;font-size:12px}</style></head><body><div class='container'><div class='header'><h1>🛰️ GeoTrack</h1><p>Votre compte est prêt !</p></div><div class='content'><h2>Bonjour {{ $json.body.name }} 👋</h2><p>Votre commande <strong>{{ $json.body.orderRef }}</strong> a été traitée avec succès. Voici vos informations d'accès :</p><div class='info-box'><div class='info-row'><span class='info-label'>📧 Email</span><span class='info-value'>{{ $json.body.email }}</span></div><div class='info-row'><span class='info-label'>🔑 Mot de passe</span><span class='info-value'>{{ $json.body.password }}</span></div><div class='info-row'><span class='info-label'>🏢 Entreprise</span><span class='info-value'>{{ $json.body.enterpriseName }}</span></div><div class='info-row'><span class='info-label'>📡 Appareils GPS</span><span class='info-value'>{{ $json.body.deviceCount }} activés</span></div></div><p style='text-align:center'><a href='{{ $json.body.loginUrl }}' class='btn'>Se connecter →</a></p><p style='color:#888;font-size:13px'>⚠️ Vous serez invité à changer votre mot de passe lors de votre première connexion.</p></div><div class='footer'><p>GeoTrack GPS Tracking — Tunisia</p><p>Ref: {{ $json.body.orderRef }}</p></div></div></body></html>",
+                "options": {}
+            },
+            "id": "send-email",
+            "name": "Send Welcome Email",
+            "type": "n8n-nodes-base.emailSend",
+            "typeVersion": 2.1,
+            "position": [
+                500,
+                300
+            ],
+            "credentials": {
+                "smtp": {
+                    "id": "YOUR_SMTP_CREDENTIAL_ID",
+                    "name": "SMTP Account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={{ JSON.stringify({ success: true, message: 'Email sent to ' + $json.body.email }) }}"
+            },
+            "id": "respond-webhook",
+            "name": "Respond Success",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1.1,
+            "position": [
+                800,
+                300
+            ]
+        }
+    ],
+    "connections": {
+        "Order Process Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Send Welcome Email",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Send Welcome Email": {
+            "main": [
+                [
+                    {
+                        "node": "Respond Success",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1"
+    }
+}

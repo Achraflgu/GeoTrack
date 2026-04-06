@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoTrack — Rapport de Projet &amp; Diagrammes UML</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+        :root {
+            --primary: #0A84FF;
+            --primary-dark: #0066CC;
+            --accent: #00E599;
+            --bg-dark: #0A0D14;
+            --bg-card: #ffffff;
+            --text: #1a1a2e;
+            --text-light: #555;
+            --border: #e2e8f0;
+            --shadow: 0 4px 24px rgba(0,0,0,0.08);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            color: var(--text);
+            background: #f0f2f5;
+            line-height: 1.7;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        @media print {
+            body { background: white; }
+            .page { box-shadow: none !important; margin: 0 !important; page-break-after: always; }
+            .no-print { display: none !important; }
+        }
+
+        .page {
+            max-width: 210mm;
+            min-height: 295mm;
+            margin: 30px auto;
+            background: white;
+            box-shadow: var(--shadow);
+            padding: 50px 55px;
+            page-break-after: always;
+            position: relative;
+            border-radius: 4px;
+        }
+
+        .page::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 5px; height: 100%;
+            background: linear-gradient(180deg, var(--primary), var(--accent));
+            border-radius: 4px 0 0 4px;
+        }
+
+        /* Cover Page */
+        .cover {
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            text-align: center; min-height: 295mm;
+            padding: 60px;
+        }
+        .cover::after { display: none; }
+        .cover-bg {
+            position: absolute; inset: 0;
+            background: linear-gradient(135deg, #0A0D14 0%, #1A2130 60%, #0A0D14 100%);
+            border-radius: 4px;
+        }
+        .cover-content { position: relative; z-index: 1; color: white; }
+        .cover-icon { font-size: 72px; margin-bottom: 20px; }
+        .cover h1 {
+            font-size: 42px; font-weight: 800;
+            background: linear-gradient(135deg, #ffffff, #00E599);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 12px;
+        }
+        .cover h2 { font-size: 20px; font-weight: 400; color: rgba(255,255,255,0.7); margin-bottom: 40px; }
+        .cover-meta { display: flex; flex-direction: column; gap: 8px; color: rgba(255,255,255,0.5); font-size: 14px; margin-top: 60px; }
+        .cover-line { width: 80px; height: 3px; background: var(--accent); margin: 20px auto; border-radius: 2px; }
+
+        /* Section headers */
+        .section-num {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 36px; height: 36px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white; font-weight: 700; font-size: 16px; margin-right: 12px;
+            flex-shrink: 0;
+        }
+        h2.section-title {
+            display: flex; align-items: center;
+            font-size: 22px; font-weight: 700; color: var(--text);
+            margin-bottom: 24px; padding-bottom: 12px;
+            border-bottom: 2px solid var(--border);
+        }
+        h3 { font-size: 16px; font-weight: 600; color: var(--primary-dark); margin: 20px 0 10px; }
+        h4 { font-size: 14px; font-weight: 600; color: var(--text); margin: 14px 0 8px; }
+
+        p { font-size: 13.5px; color: var(--text-light); margin-bottom: 10px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { font-size: 13px; color: var(--text-light); margin-bottom: 4px; }
+
+        /* Tables */
+        table { width: 100%; border-collapse: collapse; margin: 12px 0 20px; font-size: 12.5px; }
+        th { background: #f1f5f9; color: var(--text); font-weight: 600; text-align: left; padding: 10px 12px; border: 1px solid var(--border); }
+        td { padding: 8px 12px; border: 1px solid var(--border); color: var(--text-light); }
+        tr:nth-child(even) td { background: #fafbfc; }
+
+        /* Diagram wrapper */
+        .diagram-box {
+            background: #fafbfc;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 24px;
+            margin: 16px 0 24px;
+            overflow-x: auto;
+        }
+        .diagram-box .mermaid { display: flex; justify-content: center; }
+        .diagram-caption {
+            text-align: center; font-size: 12px; font-weight: 500;
+            color: var(--primary-dark); margin-top: 10px; font-style: italic;
+        }
+
+        /* Info box */
+        .info-box {
+            background: linear-gradient(135deg, #f0f7ff, #e8f4fd);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px; border-radius: 0 8px 8px 0;
+            margin: 14px 0; font-size: 13px;
+        }
+
+        /* TOC */
+        .toc a { color: var(--text); text-decoration: none; font-size: 14px; display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dotted #ddd; }
+        .toc a:hover { color: var(--primary); }
+
+        /* Footer */
+        .page-footer {
+            position: absolute; bottom: 20px; left: 55px; right: 55px;
+            display: flex; justify-content: space-between;
+            font-size: 10px; color: #aaa; border-top: 1px solid #eee; padding-top: 8px;
+        }
+
+        .badge {
+            display: inline-block; padding: 2px 10px; border-radius: 12px;
+            font-size: 11px; font-weight: 600;
+        }
+        .badge-green { background: #dcfce7; color: #166534; }
+        .badge-blue { background: #dbeafe; color: #1e40af; }
+        .badge-amber { background: #fef3c7; color: #92400e; }
+    </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════ COVER ═══════════════════════════════════ -->
+<div class="page cover">
+    <div class="cover-bg"></div>
+    <div class="cover-content">
+        <div class="cover-icon">🛰️</div>
+        <h1>GeoTrack Platform</h1>
+        <div class="cover-line"></div>
+        <h2>Rapport Technique &amp; Diagrammes UML</h2>
+        <p style="color: rgba(255,255,255,0.6); font-size: 15px; max-width: 500px; margin: 0 auto;">
+            Plateforme SaaS de Géolocalisation GPS Multi-Entreprises<br>en Temps Réel — Marché Tunisien
+        </p>
+        <div class="cover-meta">
+            <span>📅 Année universitaire 2025 — 2026</span>
+            <span>🎓 Projet de Fin d'Études</span>
+            <span>💻 Stack : React · Express · PostgreSQL · WebSocket</span>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════ TABLE DES MATIÈRES ═══════════════════════════ -->
+<div class="page">
+    <h2 class="section-title"><span class="section-num">📋</span> Table des Matières</h2>
+    <div class="toc" style="margin-top: 20px;">
+        <a href="#s1"><span>1. Description Générale du Projet</span><span>3</span></a>
+        <a href="#s2"><span>2. Étude de l'Existant</span><span>3</span></a>
+        <a href="#s3"><span>3. Architecture Technique</span><span>4</span></a>
+        <a href="#s4"><span>4. Diagramme de Cas d'Utilisation</span><span>5</span></a>
+        <a href="#s5"><span>5. Diagramme de Classes</span><span>6</span></a>
+        <a href="#s6"><span>6. Diagrammes de Séquence</span><span>7</span></a>
+        <a href="#s7"><span>7. Diagramme de Déploiement Physique</span><span>9</span></a>
+        <a href="#s8"><span>8. Fonctionnalités Implémentées</span><span>10</span></a>
+        <a href="#s9"><span>9. Schéma de Base de Données</span><span>11</span></a>
+        <a href="#s10"><span>10. Sécurité & Contrôle d'Accès (RBAC)</span><span>12</span></a>
+        <a href="#s11"><span>11. Conclusion</span><span>13</span></a>
+    </div>
+    <div class="page-footer"><span>GeoTrack — Rapport PFE</span><span>2</span></div>
+</div>
+
+<!-- ═══════════════════════════ 1. DESCRIPTION GÉNÉRALE ═══════════════════════════ -->
+<div class="page" id="s1">
+    <h2 class="section-title"><span class="section-num">1</span> Description Générale du Projet</h2>
+    <p><strong>GeoTrack</strong> est une plateforme web SaaS complète de <strong>géolocalisation GPS en temps réel</strong>, conçue pour le marché tunisien. Elle permet aux entreprises de suivre leurs véhicules, personnes, animaux et objets de valeur via des traceurs GPS professionnels et une interface web moderne.</p>
+
+    <h3>Objectifs du projet</h3>
+    <ul>
+        <li>Développer une plateforme multi-tenant permettant à chaque entreprise de gérer ses propres appareils GPS</li>
+        <li>Offrir un suivi en temps réel avec mise à jour toutes les 5 secondes via WebSocket</li>
+        <li>Implémenter un système de géofencing avancé (zones circulaires et polygonales)</li>
+        <li>Fournir un système d'alertes automatiques (vitesse, batterie, hors ligne, géofence)</li>
+        <li>Intégrer un assistant IA commercial et un chatbot dans le tableau de bord</li>
+        <li>Mettre en place un workflow complet de commande, facturation et support client</li>
+    </ul>
+
+    <h3>Technologies utilisées</h3>
+    <table>
+        <tr><th>Couche</th><th>Technologies</th></tr>
+        <tr><td><strong>Frontend</strong></td><td>React 18, TypeScript, Vite, TailwindCSS, Shadcn/ui, Zustand, Leaflet, Recharts</td></tr>
+        <tr><td><strong>Backend</strong></td><td>Node.js, Express.js, Knex.js, WebSocket (ws), bcrypt</td></tr>
+        <tr><td><strong>Base de données</strong></td><td>PostgreSQL (migré depuis MongoDB)</td></tr>
+        <tr><td><strong>Services externes</strong></td><td>Mailjet (email), n8n + Ollama (IA), Cloudflare Tunnel</td></tr>
+    </table>
+
+    <!-- ═══════════ 2. ÉTUDE DE L'EXISTANT ═══════════ -->
+    <h2 class="section-title" id="s2" style="margin-top: 30px;"><span class="section-num">2</span> Étude de l'Existant</h2>
+    <p>Avant de développer GeoTrack, une étude comparative des solutions GPS existantes sur le marché tunisien et international a été réalisée :</p>
+
+    <table>
+        <tr><th>Critère</th><th>Traccar</th><th>GPS Tunisie</th><th>Navixy</th><th style="background:#e0f2fe"><strong>GeoTrack</strong></th></tr>
+        <tr><td>Open source</td><td>✅</td><td>❌</td><td>❌</td><td style="background:#f0f9ff">✅ (propriétaire)</td></tr>
+        <tr><td>Multi-tenant</td><td>Partiel</td><td>❌</td><td>✅</td><td style="background:#f0f9ff"><strong>✅ Complet</strong></td></tr>
+        <tr><td>Temps réel (WebSocket)</td><td>✅</td><td>Polling</td><td>✅</td><td style="background:#f0f9ff"><strong>✅ 5s</strong></td></tr>
+        <tr><td>Géofencing avancé</td><td>✅</td><td>Basique</td><td>✅</td><td style="background:#f0f9ff"><strong>✅ Cercle+Polygone</strong></td></tr>
+        <tr><td>Chatbot IA intégré</td><td>❌</td><td>❌</td><td>❌</td><td style="background:#f0f9ff"><strong>✅ Ollama</strong></td></tr>
+        <tr><td>Support bilingue FR/EN</td><td>Multi</td><td>FR</td><td>EN</td><td style="background:#f0f9ff"><strong>✅ FR/EN</strong></td></tr>
+        <tr><td>Pipeline commande</td><td>❌</td><td>Manuel</td><td>❌</td><td style="background:#f0f9ff"><strong>✅ Automatisé</strong></td></tr>
+        <tr><td>Adapté Tunisie</td><td>❌</td><td>✅</td><td>❌</td><td style="background:#f0f9ff"><strong>✅ TND, routes locales</strong></td></tr>
+    </table>
+
+    <div class="info-box">
+        <strong>💡 Valeur ajoutée de GeoTrack :</strong> Contrairement aux solutions existantes, GeoTrack combine la gestion multi-entreprises, un assistant IA intégré (Ollama), un pipeline de commande automatisé, et une adaptation locale au marché tunisien (devise TND, itinéraires Tunis/Sousse/Djerba).
+    </div>
+
+    <div class="page-footer"><span>GeoTrack — Rapport PFE</span><span>3</span></div>
+</div>
+
+<!-- ═══════════════════════════ 3. ARCHITECTURE TECHNIQUE ═══════════════════════════ -->
+<div class="page" id="s3">
+    <h2 class="section-title"><span class="section-num">3</span> Architecture Technique</h2>
+    <p>GeoTrack repose sur une architecture <strong>3-tiers</strong> avec communication temps réel via WebSocket :</p>
+
+    <div class="diagram-box">
+        <div class="mermaid">
+graph TB
+    subgraph "🌐 Frontend - React SPA"
+        A["React 18 + TypeScript<br/>Vite (port 8080)"]
+        B["Zustand Store<br/>(Auth + App)"]
+        C["Leaflet Maps"]
+        D["49 Composants Shadcn/ui"]
+    end
+
+    subgraph "⚙️ Backend - Express API"
+        E["Express.js<br/>(port 3001)"]
+        F["WebSocket Server"]
+        G["Simulation Engine<br/>(GPS)"]
+        H["15 Routeurs API REST"]
+    end
+
+    subgraph "🗄️ Base de données"
+        I["PostgreSQL<br/>(14 tables)"]
+    end
+
+    subgraph "🔌 Services Externes"
+        J["Mailjet<br/>(Email)"]
+        K["n8n + Ollama<br/>(Chatbot IA)"]
+        L["Cloudflare Tunnel<br/>(Tracker HTTPS)"]
+    end
+
+    A <-->|"REST API"| E
+    A <-->|"WebSocket /ws"| F
+    E --> I
+    G --> I
+    G --> F
+    E --> J
+    E --> K
+    L --> E
+        </div>
+        <div class="diagram-caption">Figure 1 — Architecture globale de la plateforme GeoTrack</div>
+    </div>
+
+    <h3>Communication temps réel</h3>
+    <p>Le serveur WebSocket diffuse les mises à jour GPS à tous les clients connectés, avec <strong>filtrage par rôle et entreprise</strong>. Les administrateurs reçoivent toutes les données, tandis que les opérateurs ne voient que les appareils de leur entreprise.</p>
+
+    <table>
+        <tr><th>Message WebSocket</th><th>Direction</th><th>Description</th></tr>
+        <tr><td><code>identify</code></td><td>Client → Serveur</td><td>Identification du client (rôle, entreprise)</td></tr>
+        <tr><td><code>devices-update</code></td><td>Serveur → Client</td><td>Positions GPS mises à jour (filtré)</td></tr>
+        <tr><td><code>alert-new</code></td><td>Serveur → Client</td><td>Nouvelle alerte détectée</td></tr>
+        <tr><td><code>support_message</code></td><td>Serveur → Client</td><td>Nouveau message support</td></tr>
+        <tr><td><code>support_ticket_update</code></td><td>Serveur → Client</td><td>Mise à jour statut ticket</td></tr>
+    </table>
+
+    <div class="page-footer"><span>GeoTrack — Rapport PFE</span><span>4</span></div>
+</div>
+
+<!-- ═══════════════════════════ 4. CAS D'UTILISATION ═══════════════════════════ -->
+<div class="page" id="s4">
+    <h2 class="section-title"><span class="section-num">4</span> Diagramme de Cas d'Utilisation</h2>
+    <p>Ce diagramme représente les interactions entre les trois acteurs du système et les fonctionnalités disponibles :</p>
+
+    <div class="diagram-box">
+        <div class="mermaid">
+graph LR
+    Admin["👑 Administrateur"]
+    Supervisor["👁️ Superviseur"]
+    Operator["🔧 Opérateur"]
+    Visitor["👤 Visiteur"]
+
+    subgraph "GeoTrack Platform"
+        UC1["Se connecter / Se déconnecter"]
+        UC2["Consulter le tableau de bord"]
+        UC3["Voir la carte temps réel"]
+        UC4["Gérer les appareils GPS<br/>(CRUD)"]
+        UC5["Voir le détail d'un appareil<br/>+ Historique"]
+        UC6["Gérer les entreprises<br/>(CRUD)"]
+        UC7["Gérer les utilisateurs<br/>(CRUD)"]
+        UC8["Configurer les zones GPS<br/>(Géofencing)"]
+        UC9["Voir les alertes<br/>+ Marquer comme lu"]
+        UC10["Ouvrir un ticket support<br/>+ Chat temps réel"]
+        UC11["Gérer les commandes<br/>+ Traitement"]
+        UC12["Gérer la facturation<br/>+ Plans"]
+        UC13["Consulter le journal d'audit"]
+        UC14["Modifier son profil"]
+        UC15["Paramètres de l'application"]
+        UC16["Voir la landing page<br/>+ Chatbot IA"]
+        UC17["Passer une commande<br/>(Popup/Chatbot)"]
+        UC18["Accéder au mode Démo"]
+        UC19["Consulter le Guide"]
+    end
+
+    Admin --> UC1 & UC2 & UC3 & UC4 & UC5 & UC6 & UC7 & UC8 & UC9 & UC10 & UC11 & UC12 & UC13 & UC14 & UC15
+
+    Supervisor --> UC1 & UC2 & UC3 & UC5 & UC9 & UC10 & UC14
+    Supervisor -.->|"Lecture seule"| UC6
+    Supervisor -.->|"Lecture seule"| UC7
+
+    Operator --> UC1 & UC2 & UC3 & UC5 & UC8 & UC9 & UC10 & UC12 & UC14 & UC15
+
+    Visitor --> UC16 & UC17 & UC18 & UC19
+        </div>
+        <div class="diagram-caption">Figure 2 — Diagramme de Cas d'Utilisation Global</div>
+    </div>
+
+    <h3>Description des acteurs</h3>
+    <table>
+        <tr><th>Acteur</th><th>Rôle</th><th>Accès</th></tr>
+        <tr><td>👑 Administrateur</td><td>Gestion totale de la plateforme</td><td>Toutes les fonctionnalités (CRUD complet)</td></tr>
+        <tr><td>👁️ Superviseur</td><td>Surveillance et consultation</td><td>Lecture seule sur entreprises et utilisateurs</td></tr>
+        <tr><td>🔧 Opérateur</td><td>Gestion de son entreprise</td><td>Appareils de son entreprise uniquement</td></tr>
+        <tr><td>👤 Visiteur</td><td>Prospect / client potentiel</td><td>Landing page, démo, commande, guide</td></tr>
+    </table>
+
+    <div class="page-footer"><span>GeoTrack — Rapport PFE</span><span>5</span></div>
+</div>
+
+<!-- ═══════════════════════════ 5. DIAGRAMME DE CLASSES ═══════════════════════════ -->
+<div class="page" id="s5">
+    <h2 class="section-title"><span class="section-num">5</span> Diagramme de Classes</h2>
+    <p>Le diagramme suivant représente le modèle de données métier de GeoTrack avec les relations entre entités :</p>
+
+    <div class="diagram-box">
+        <div class="mermaid">
+classDiagram
+    class Enterprise {
+        +UUID id
+        +String name
+        +String contactEmail
+        +String phone
+        +String address
+        +String plan
+        +String status
+        +String serialPrefix
+        +Int lastSerialCounter
+        +String imeiPrefix
+        +create()
+        +update()
+        +delete()
+        +getDeviceCount()
+    }
+
+    class User {
+        +UUID id
+        +String email
+        +String password
+        +String name
+        +String role
+        +String plan
+        +UUID enterpriseId
+        +Boolean emailVerified
+        +Boolean isInitialPassword
+        +login()
+        +logout()
+        +setPassword()
+        +verifyEmail()
+    }
+
+    class Device {
+        +UUID id
+        +String imei
+        +String name
+        +String deviceType
+        +String serialNumber
+        +String status
+        +Float locationLat
+        +Float locationLng
+        +Float speed
+        +Float battery
+        +String dataSource
+        +updatePosition()
+        +getHistory()
+    }
+
+    class Alert {
+        +UUID id
+        +UUID deviceId
+        +String type
+        +String severity
+        +String message
+        +markRead()
+        +delete()
+    }
+
+    class Geofence {
+        +UUID id
+        +String name
+        +String type
+        +Float centerLat
+        +Float centerLng
+        +Float radius
+        +JSON polygon
+        +Boolean alertOnExit
+        +Boolean alertOnEntry
+        +checkBoundary()
+    }
+
+    class Order {
+        +UUID id
+        +String fullName
+        +String email
+        +Int gpsCount
+        +String plan
+        +String status
+        +String orderRef
+        +process()
+        +updateStatus()
+    }
+
+    class Payment {
+        +UUID id
+        +UUID userId
+        +String plan
+        +Float amount
+        +String status
+        +String invoiceRef
+    }
+
+    class SupportTicket {
+        +UUID id
+        +UUID userId
+        +String subject
+        +String status
+        +close()
+        +reopen()
+    }
+
+    class SupportMessage {
+        +UUID id
+        +UUID ticketId
+        +UUID senderId
+        +String message
+    }
+
+    class DeviceHistory {
+        +UUID id
+        +UUID deviceId
+        +Float lat
+        +Float lng
+        +Float speed
+        +Timestamp timestamp
+    }
+
+    Enterprise "1" --> "*" Device : possède
+    Enterprise "1" --> "*" User : emploie
+    Enterprise "1" --> "*" Geofence : définit
+    User "1" --> "*" SupportTicket : ouvre
+    SupportTicket "1" --> "*" SupportMessage : contient
+    Device "1" --> "*" Alert : déclenche
+    Device "1" --> "*" DeviceHistory : génère
+    Geofence "*" --> "*" Device : surveille
+    User "1" --> "*" Payment : effectue
+        </div>
+        <div class="diagram-caption">Figure 3 — Diagramme de Classes du domaine GeoTrack</div>
+    </div>
+
+    <div class="page-footer"><span>GeoTrack — Rapport PFE</span><span>6</span></div>
+</div>
+
+<!-- ═══════════════════════════ 6. DIAGRAMMES DE SÉQUENCE ═══════════════════════════ -->
+<div class="page" id="s6">
+    <h2 class="section-title"><span class="section-num">6</span> Diagrammes de Séquence</h2>
+
+    <h3>6.1 — Authentification et connexion utilisateur</h3>
+    <div class="diagram-box">
+        <div class="mermaid">
+sequenceDiagram
+    actor U as Utilisateur
+    participant F as Frontend React
+    participant A as API /auth/login
+    participant DB as PostgreSQL
+    participant M as Mailjet
+
+    U->>F: Saisir email + mot de passe
+    F->>A: POST /api/auth/login
+    A->>DB: SELECT user WHERE email
+    DB-->>A: User trouvé
+    A->>A: bcrypt.compare(password)
+
+    alt Mot de passe invalide
+        A-->>F: 401 Identifiants invalides
+        F-->>U: Afficher erreur
+    end
+
+    alt Email non vérifié
+        A-->>F: needsVerification: true
+        F-->>U: Afficher modal vérification
+        U->>F: Demander code OTP
+        F->>A: POST /users/send-verification
+        A->>M: Envoyer email OTP (6 chiffres)
+        M-->>U: 📧 Email avec code
+        U->>F: Saisir code OTP
+        F->>A: POST /users/verify-email
+        A->>DB: UPDATE emailVerified = true
+        A-->>F: Vérifié ✅
+    end
+
+    alt Succès
+        A->>DB: UPDATE lastLogin
+        A-->>F: user + success: true
+        F->>F: Zustand: setAuthenticated
+        F-->>U: Redirection → Dashboard
+    end
+        </div>
+        <div class="diagram-caption">Figure 4 — Séquence d'authentification avec vérification OTP</div>
+    </div>
+
+    <h3>6.2 — Suivi GPS temps réel</h3>
+    <div class="diagram-box">
+        <div class="mermaid">
+sequenceDiagram
+    participant SE as Simulation Engine
+    participant DB as PostgreSQL
+    participant WS as WebSocket Server
+    participant C as Client React
+
+    C->>WS: connect(/ws)
+    C->>WS: identify({role, enterpriseId})
+
+    loop Toutes les 5 secondes
+        SE->>DB: Récupérer devices (data_source=fake)
+        DB-->>SE: Liste des fake devices
+        SE->>SE: Calculer nouvelle position<br/>(route + speed + heading)
+        SE->>DB: UPDATE position + battery + speed
+        SE->>DB: INSERT device_history (chaque 3ème cycle)
+
+        alt Batterie < 30%
+            SE->>DB: INSERT alert (battery)
+            SE->>WS: broadcast(alert-new)
+        end
+
+        alt Vitesse > 70 km/h
+            SE->>DB: INSERT alert (speed)
+            SE->>WS: broadcast(alert-new)
+        end
+
+        SE->>DB: SELECT ALL devices
+        DB-->>SE: Tous les appareils
+        SE->>WS: broadcast(devices-update)
+        WS->>C: Données filtrées par entreprise
+        C->>C: Mise à jour carte Leaflet
+    end
+        </div>
+        <div class="diagram-caption">Figure 5 — Séquence de mise à jour GPS en temps réel</div>
+    </div>
+
+    <div class="page-footer"><span>GeoTrack — Rapport PFE</span><span>7</span></div>
+</div>
+
+<!-- ═══════════════════ 6. SÉQUENCES (suite) ═══════════════════ -->
+<div class="page">
+    <h3>6.3 — Processus de commande de traceurs GPS</h3>
+    <div class="diagram-box">
+        <div class="mermaid">
+sequenceDiagram
+    actor V as Visiteur
+    participant P as Popup / Chatbot
+    participant API as API /orders
+    participant DB as PostgreSQL
+    participant ML as Mailjet
+    actor AD as Administrateur
+
+    V->>P: Remplir formulaire de commande
+    P->>API: POST /api/orders
+    API->>API: Générer orderRef (GT-YYMM-XXXX)
+    API->>DB: INSERT order (status=pending)
+    API->>ML: sendStatusUpdateEmail(pending)
+    ML-->>V: 📧 Confirmation de réception
+    API-->>P: order créé ✅
+
+    AD->>API: PATCH /orders/:id (status=confirmed)
+    API->>DB: UPDATE status + confirmedAt
+    API->>ML: sendStatusUpdateEmail(confirmed)
+    ML-->>V: 📧 Commande confirmée
+
+    AD->>API: POST /orders/:id/process
+    API->>DB: Créer Enterprise + User + Devices
+    API->>DB: UPDATE status = active
+    API->>ML: Envoyer identifiants au client
+    ML-->>V: 📧 Identifiants de connexion
+    V->>V: Se connecter à la plateforme
+        </div>
+        <div class="diagram-caption">Figure 6 — Séquence de traitement d'une commande de traceurs</div>
+    </div>
+
+    <h3>6.4 — Détection de sortie de zone (Géofencing)</h3>
+    <div class="diagram-box">
+        <div class="mermaid">
+sequenceDiagram
+    participant SE as Simulation Engine
+    participant DB as PostgreSQL
+    participant WS as WebSocket Server
+    participant C as Client React
+
+    SE->>DB: SELECT geofences (is_active=true)
+    DB-->>SE: Zones actives + devices assignés
+
+    loop Pour chaque zone
+        SE->>SE: Calculer position appareil vs zone
+        SE->>SE: Haversine (cercle) ou Point-in-Polygon
+
+        alt Transition SORTIE détectée
+            SE->>DB: INSERT alert (type=geofence, severity=high)
+            SE->>WS: broadcast(alert-new, enterpriseId)
+            WS->>C: ⚠️ Sortie de zone détectée
+            C->>C: Toast notification + son
+        end
+
+        alt Transition ENTRÉE détectée
+            SE->>DB: INSERT alert (type=geofence, severity=medium)
+            SE->>WS: broadcast(alert-new, enterpriseId)
+            WS->>C: 📍 Entrée de zone détectée
+        end
+    end
+        </div>
+        <div class="diagram-caption">Figure 7 — Séquence de détection de franchissement de géofence</div>
+    </div>
+
+    <div class="page-footer"><span>GeoTrack — Rapport PFE</span><span>8</span></div>
+</div>
+
+<!-- ═══════════════════════════ 7. DÉPLOIEMENT PHYSIQUE ═══════════════════════════ -->
+<div class="page" id="s7">
+    <h2 class="section-title"><span class="section-num">7</span> Diagramme de Déploiement Physique</h2>
+    <p>Ce diagramme montre l'infrastructure de déploiement et les protocoles de communication entre les nœuds :</p>
+
+    <div class="diagram-box">
+        <div class="mermaid">
+graph TB
+    subgraph "📱 Client"
+        Browser["🖥️ Navigateur Web<br/>(React SPA)<br/>Port 8080"]
+        Mobile["📱 Tracker Mobile<br/>(Page HTML)"]
+    end
+
+    subgraph "☁️ Tunnel Cloud"
+        CF["🌐 Cloudflare Tunnel<br/>(HTTPS public)<br/>*.trycloudflare.com"]
+    end
+
+    subgraph "🖥️ Serveur Principal"
+        Vite["⚡ Vite Dev Server<br/>Port 8080"]
+        Express["🟢 Express.js<br/>Port 3001"]
+        WSS["🔌 WebSocket Server<br/>ws://Port 3001/ws"]
+        Sim["🎮 Simulation Engine<br/>(Node.js)"]
+    end
+
+    subgraph "🗄️ Serveur Base de données"
+        PG["🐘 PostgreSQL<br/>Port 5432<br/>Database: geotrack"]
+    end
+
+    subgraph "🤖 Serveur IA"
+        N8N["📋 n8n<br/>Port 5678"]
+        Ollama["🧠 Ollama<br/>Port 11434<br/>Model: gemma3:1b"]
+    end
+
+    subgraph "📧 Service Email"
+        MJ["✉️ Mailjet API<br/>(Cloud SaaS)"]
+    end
+
+    Browser -->|"HTTP/HTTPS"| Vite
+    Browser -->|"REST API"| Express
+    Browser -->|"WebSocket"| WSS
+    Mobile -->|"HTTPS"| CF
+    CF -->|"HTTP"| Express
+    Express -->|"SQL (Knex.js)"| PG
+    Sim -->|"SQL"| PG
+    Sim -->|"broadcast"| WSS
+    Express -->|"Webhook"| N8N
+    N8N -->|"HTTP"| Ollama
+    Express -->|"API v3.1"| MJ
+        </div>
+        <div class="diagram-caption">Figure 8 — Diagramme de Déploiement Physique</div>
+    </div>
+
+    <h3>Protocoles de communication</h3>
+    <table>
+        <tr><th>Connexion</th><th>Protocole</th><th>Port</th></tr>
+        <tr><td>Client ↔ Frontend</td><td>HTTP (Vite HMR)</td><td>8080</td></tr>
+        <tr><td>Client ↔ API Backend</td><td>REST (HTTP/JSON)</td><td>3001</td></tr>
+        <tr><td>Client ↔ Temps réel</td><td>WebSocket (WS)</td><td>3001/ws</td></tr>
+        <tr><td>Tracker ↔ Backend</td><td>HTTPS (via Cloudflare)</td><td>443 → 3001</td></tr>
+        <tr><td>Backend ↔ PostgreSQL</td><td>TCP (pg protocol)</td><td>5432</td></tr>
+        <tr><td>Backend ↔ n8n</td><td>HTTP Webhook</td><td>5678</td></tr>
+        <tr><td>n8n ↔ Ollama</td><td>HTTP REST</td><td>11434</td></tr>
+        <tr><td>Backend ↔ Mailjet</td><td>HTTPS REST</td><td>443</td></tr>
+    </table>
+
+    <div class="page-footer"><span>GeoTrack — Rapport PFE</span><span>9</span></div>
+</div>
+
+<!-- ═══════════════════════════ 8. FONCTIONNALITÉS ═══════════════════════════ -->
+<div class="page" id="s8">
+    <h2 class="section-title"><span class="section-num">8</span> Fonctionnalités Implémentées</h2>
+
+    <h3>8.1 — Modules fonctionnels</h3>
+    <table>
+        <tr><th>Module</th><th>Fonctionnalités clés</th><th>Statut</th></tr>
+        <tr><td>🗺️ Suivi GPS</td><td>Carte Leaflet temps réel, 11 types d'appareils, 8 statuts, historique des trajets</td><td><span class="badge badge-green">✅ Complet</span></td></tr>
+        <tr><td>🔔 Alertes</td><td>5 types (battery, speed, geofence, sos, offline), 3 niveaux, cooldown anti-spam, son</td><td><span class="badge badge-green">✅ Complet</span></td></tr>
+        <tr><td>🗂️ Géofencing</td><td>Zones cercle + polygone, alertes entrée/sortie, détection transitions temps réel</td><td><span class="badge badge-green">✅ Complet</span></td></tr>
+        <tr><td>📦 Commandes</td><td>Workflow 5 statuts, auto-ref, emails transactionnels, traitement automatique</td><td><span class="badge badge-green">✅ Complet</span></td></tr>
+        <tr><td>💳 Facturation</td><td>3 plans (Starter/Pro/Enterprise), 3 cycles, paiements, annulation, factures</td><td><span class="badge badge-green">✅ Complet</span></td></tr>
+        <tr><td>🤖 Chatbot IA</td><td>Landing page + Dashboard, n8n + Ollama (gemma3:1b), mémoire de session</td><td><span class="badge badge-green">✅ Complet</span></td></tr>
+        <tr><td>💬 Support</td><td>Tickets, chat temps réel WebSocket, routing admin ↔ opérateur</td><td><span class="badge badge-green">✅ Complet</span></td></tr>
+        <tr><td>📊 Dashboard</td><td>Statistiques, carte aperçu, appareils en mouvement, alertes récentes</td><td><span class="badge badge-green">✅ Complet</span></td></tr>
+        <tr><td>🔐 Auth</td><td>Login, OTP email, changement mot de passe initial, RBAC 3 rôles</td><td><span class="badge badge-green">✅ Complet</span></td></tr>
+        <tr><td>🌐 i18n</td><td>Français (défaut) + Anglais, 144 clés de traduction</td><td><span class="badge badge-green">✅ Complet</span></td></tr>
+        <tr><td>📝 Audit</td><td>Journal complet des actions, filtrage, export CSV</td><td><span class="badge badge-green">✅ Complet</span></td></tr>
+        <tr><td>⚙️ Simulation</td><td>Moteur GPS réaliste, 11 profils comportementaux, routes tunisiennes</td><td><span class="badge badge-green">✅ Complet</span></td></tr>
+        <tr><td>📱 Tracker</td><td>Page web mobile, Cloudflare Tunnel HTTPS, token unique par appareil</td><td><span class="badge badge-green">✅ Complet</span></td></tr>
+    </table>
+
+    <h3>8.2 — Pages de l'application (19 pages)</h3>
+    <table>
+        <tr><th>#</th><th>Page</th><th>Accès</th><th>Description</th></tr>
+        <tr><td>1</td><td>Landing Page</td><td>Public</td><td>Vitrine + chatbot + commande</td></tr>
+        <tr><td>2</td><td>Login</td><td>Public</td><td>Connexion + vérification email</td></tr>
+        <tr><td>3</td><td>Guide</td><td>Public</td><td>Guide en 5 étapes</td></tr>
+        <tr><td>4</td><td>Dashboard</td><td>Authentifié</td><td>Tableau de bord principal</td></tr>
+        <tr><td>5</td><td>Carte</td><td>Authentifié</td><td>Carte temps réel Leaflet</td></tr>
+        <tr><td>6</td><td>Appareils</td><td>Authentifié</td><td>Liste des appareils</td></tr>
+        <tr><td>7</td><td>Détail Appareil</td><td>Authentifié</td><td>Info complète + historique + carte</td></tr>
+        <tr><td>8</td><td>Entreprises</td><td>Admin/Supervisor</td><td>Gestion entreprises</td></tr>
+        <tr><td>9</td><td>Détail Entreprise</td><td>Admin/Supervisor</td><td>Info + appareils</td></tr>
+        <tr><td>10</td><td>Utilisateurs</td><td>Admin/Supervisor</td><td>Gestion utilisateurs</td></tr>
+        <tr><td>11</td><td>Alertes</td><td>Authentifié</td><td>Alertes système</td></tr>
+        <tr><td>12</td><td>Zones GPS</td><td>Pro+</td><td>Geofencing avancé</td></tr>
+        <tr><td>13</td><td>Support</td><td>Authentifié</td><td>Chat support</td></tr>
+        <tr><td>14</td><td>Commandes</td><td>Admin</td><td>Pipeline commandes</td></tr>
+        <tr><td>15</td><td>Facturation</td><td>Authentifié</td><td>Plans et paiements</td></tr>
+        <tr><td>16</td><td>Paramètres</td><td>Authentifié</td><td>Configuration</td></tr>
+        <tr><td>17</td><td>Profil</td><td>Authentifié</td><td>Profil utilisateur</td></tr>
+        <tr><td>18</td><td>Audit Logs</td><td>Admin</td><td>Journal d'audit</td></tr>
+        <tr><td>19</td><td>404</td><td>Public</td><td>Page non trouvée</td></tr>
+    </table>
+
+    <div class="page-footer"><span>GeoTrack — Rapport PFE</span><span>10</span></div>
+</div>
+
+<!-- ═══════════════════════════ 9. BASE DE DONNÉES ═══════════════════════════ -->
+<div class="page" id="s9">
+    <h2 class="section-title"><span class="section-num">9</span> Schéma de Base de Données</h2>
+    <p>Le projet utilise <strong>PostgreSQL</strong> avec 14 tables reliées par des clés étrangères UUID :</p>
+
+    <div class="diagram-box">
+        <div class="mermaid">
+erDiagram
+    enterprises ||--o{ devices : "1:N"
+    enterprises ||--o{ users : "1:N"
+    enterprises ||--o{ geofences : "1:N"
+    enterprises ||--o{ alerts : "1:N"
+    users ||--o{ support_tickets : "1:N"
+    users ||--o{ payments : "1:N"
+    devices ||--o{ device_history : "1:N"
+    devices ||--o{ alerts : "1:N"
+    geofences ||--o{ geofence_devices : "1:N"
+    devices ||--o{ geofence_devices : "1:N"
+    support_tickets ||--o{ support_messages : "1:N"
+    alerts ||--o{ alert_reads : "1:N"
+    users ||--o{ alert_reads : "1:N"
+
+    enterprises {
+        uuid id PK
+        text name
+        text contact_email
+        text plan
+        text status
+        text serial_prefix
+        int last_serial_counter
+    }
+
+    devices {
+        uuid id PK
+        text imei UK
+        text name
+        text device_type
+        uuid enterprise_id FK
+        text status
+        float location_lat
+        float location_lng
+        float speed
+        float battery
+    }
+
+    users {
+        uuid id PK
+        text email UK
+        text password
+        text name
+        text role
+        uuid enterprise_id FK
+        boolean email_verified
+    }
+
+    alerts {
+        uuid id PK
+        uuid device_id FK
+        uuid enterprise_id FK
+        text type
+        text severity
+        text message
+    }
+
+    geofences {
+        uuid id PK
+        text name
+        uuid enterprise_id FK
+        text type
+        float radius
+        jsonb polygon
+    }
+
+    orders {
+        uuid id PK
+        text full_name
+        text email
+        int gps_count
+        text status
+        text order_ref UK
+    }
+
+    payments {
+        uuid id PK
+        uuid user_id FK
+        text plan
+        float amount
+        text status
+        text invoice_ref UK
+    }
+        </div>
+        <div class="diagram-caption">Figure 9 — Modèle Entité-Relation de la base de données PostgreSQL</div>
+    </div>
+
+    <div class="info-box">
+        <strong>📌 Note :</strong> La base de données a été migrée de <strong>MongoDB</strong> vers <strong>PostgreSQL</strong>. Les ObjectId MongoDB ont été remplacés par des UUID v4. Les relations embedded ont été normalisées avec des tables de jonction (<code>geofence_devices</code>, <code>alert_reads</code>).
+    </div>
+
+    <div class="page-footer"><span>GeoTrack — Rapport PFE</span><span>11</span></div>
+</div>
+
+<!-- ═══════════════════════════ 10. SÉCURITÉ RBAC ═══════════════════════════ -->
+<div class="page" id="s10">
+    <h2 class="section-title"><span class="section-num">10</span> Sécurité &amp; Contrôle d'Accès (RBAC)</h2>
+
+    <h3>10.1 — Matrice des permissions</h3>
+    <table>
+        <tr><th>Fonctionnalité</th><th>👑 Admin</th><th>👁️ Supervisor</th><th>🔧 Operator</th></tr>
+        <tr><td>Voir tous les appareils</td><td>✅</td><td>✅</td><td>❌ (son entreprise)</td></tr>
+        <tr><td>Créer des appareils</td><td>✅</td><td>❌</td><td>❌</td></tr>
+        <tr><td>Modifier des appareils</td><td>✅</td><td>❌</td><td>✅ (son entreprise)</td></tr>
+        <tr><td>Supprimer des appareils</td><td>✅</td><td>❌</td><td>❌</td></tr>
+        <tr><td>Gérer les entreprises</td><td>✅ CRUD</td><td>👁️ Lecture</td><td>❌</td></tr>
+        <tr><td>Gérer les utilisateurs</td><td>✅ CRUD</td><td>👁️ Lecture</td><td>❌</td></tr>
+        <tr><td>Zones GPS (géofences)</td><td>✅</td><td>✅</td><td>✅ (plan Pro+)</td></tr>
+        <tr><td>Journal d'audit</td><td>✅</td><td>❌</td><td>❌</td></tr>
+        <tr><td>Gestion commandes</td><td>✅</td><td>❌</td><td>❌</td></tr>
+        <tr><td>Support (tickets)</td><td>✅ Répondre</td><td>✅ Répondre</td><td>✅ Créer</td></tr>
+        <tr><td>Facturation</td><td>✅</td><td>❌</td><td>✅</td></tr>
+    </table>
+
+    <h3>10.2 — Mécanismes de sécurité implémentés</h3>
+    <table>
+        <tr><th>Mécanisme</th><th>Implémentation</th></tr>
+        <tr><td>Hachage de mots de passe</td><td>bcrypt avec salt 10 rounds</td></tr>
+        <tr><td>Vérification email</td><td>OTP 6 chiffres via Mailjet (expiration 10 min)</td></tr>
+        <tr><td>Changement mot de passe</td><td>Obligatoire lors de la première connexion</td></tr>
+        <tr><td>Isolation des données</td><td>Filtrage côté serveur par <code>enterprise_id</code></td></tr>
+        <tr><td>Mode démo protégé</td><td>Mutations bloquées côté API et Store pour <code>demo@geotrack.tn</code></td></tr>
+        <tr><td>Guards de routes</td><td><code>ProtectedRoute</code>, <code>RoleRoute</code>, <code>PlanRoute</code></td></tr>
+        <tr><td>WebSocket filtré</td><td>Données filtrées par rôle et entreprise à la diffusion</td></tr>
+        <tr><td>Audit trail</td><td>Journalisation de toutes les actions (login, CRUD, logout)</td></tr>
+    </table>
+
+    <h3>10.3 — Flux de sécurité</h3>
+    <div class="diagram-box">
+        <div class="mermaid">
+graph LR
+    A["Connexion"] --> B{"Email vérifié ?"}
+    B -->|Non| C["Envoyer OTP Email"]
+    C --> D["Saisir Code OTP"]
+    D --> E{"Code valide ?"}
+    E -->|Non| C
+    E -->|Oui| F{"Mot de passe initial ?"}
+    B -->|Oui| F
+    F -->|Oui| G["Définir nouveau mot de passe"]
+    G --> H["✅ Accès Dashboard"]
+    F -->|Non| H
+    H --> I{"Rôle ?"}
+    I -->|Admin| J["Accès complet"]
+    I -->|Supervisor| K["Lecture seule"]
+    I -->|Operator| L["Son entreprise uniquement"]
+        </div>
+        <div class="diagram-caption">Figure 10 — Flux de sécurité et d'onboarding</div>
+    </div>
+
+    <div class="page-footer"><span>GeoTrack — Rapport PFE</span><span>12</span></div>
+</div>
+
+<!-- ═══════════════════════════ 11. CONCLUSION ═══════════════════════════ -->
+<div class="page" id="s11">
+    <h2 class="section-title"><span class="section-num">11</span> Conclusion</h2>
+
+    <p>Le projet <strong>GeoTrack</strong> représente une solution complète et fonctionnelle de géolocalisation GPS multi-entreprises, développée avec des technologies modernes et adaptée au marché tunisien.</p>
+
+    <h3>Réalisations principales</h3>
+    <ul>
+        <li><strong>19 pages frontend</strong> avec interface responsive et design premium (Shadcn/ui + TailwindCSS)</li>
+        <li><strong>15 routeurs API</strong> couvrant tous les domaines métier (60+ endpoints)</li>
+        <li><strong>14 tables PostgreSQL</strong> avec relations normalisées et indexes optimisés</li>
+        <li><strong>Temps réel complet</strong> via WebSocket avec filtrage par rôle et entreprise</li>
+        <li><strong>Moteur de simulation GPS</strong> réaliste avec 11 profils comportementaux</li>
+        <li><strong>Géofencing avancé</strong> avec détection de transitions (entrée/sortie)</li>
+        <li><strong>IA intégrée</strong> via n8n + Ollama pour assistance commerciale</li>
+        <li><strong>Pipeline e-commerce</strong> complet : commande → facturation → activation</li>
+        <li><strong>Sécurité robuste</strong> : RBAC 3 rôles, bcrypt, OTP, isolation des données</li>
+    </ul>
+
+    <h3>Perspectives d'évolution</h3>
+    <ul>
+        <li>Ajout de middleware JWT pour sécuriser toutes les routes API</li>
+        <li>Implémentation de tests unitaires et d'intégration</li>
+        <li>Conteneurisation avec Docker + pipeline CI/CD</li>
+        <li>Documentation API avec Swagger/OpenAPI</li>
+        <li>Application mobile native (React Native)</li>
+        <li>Intégration de protocoles GPS hardware (GT06, H02, T55)</li>
+        <li>Tableau de bord analytique avancé avec BI</li>
+    </ul>
+
+    <div class="info-box" style="margin-top: 30px;">
+        <strong>📊 Statistiques du projet :</strong><br>
+        ~70+ composants React · 856 lignes (store) · 536 lignes (simulation engine) · 428 lignes (API client) · 358 lignes (migration) · 144 clés i18n · 49 composants UI · 14 tables DB
+    </div>
+
+    <div style="text-align: center; margin-top: 50px; color: #aaa; font-size: 13px;">
+        <p>— Fin du rapport —</p>
+        <p style="margin-top: 8px;">GeoTrack Platform © 2026 — Tous droits réservés</p>
+    </div>
+
+    <div class="page-footer"><span>GeoTrack — Rapport PFE</span><span>13</span></div>
+</div>
+
+<script>
+    mermaid.initialize({
+        startOnLoad: true,
+        theme: 'default',
+        securityLevel: 'loose',
+        flowchart: { useMaxWidth: true, htmlLabels: true, curve: 'basis' },
+        sequence: { useMaxWidth: true, showSequenceNumbers: false },
+        class: { useMaxWidth: true },
+        er: { useMaxWidth: true }
+    });
+</script>
+
+</body>
+</html>

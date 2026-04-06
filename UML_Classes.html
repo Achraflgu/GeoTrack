@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoTrack — Diagramme de Classes (Intégral & Exclusif GeoTrack)</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700;800&display=swap');
+        body { 
+            font-family: 'Inter', sans-serif;
+            background: #e2e8f0; 
+            padding: 40px; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: auto;
+        }
+        .canvas-container {
+            width: 1950px;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            padding: 50px;
+        }
+        h1 { text-align: center; font-size: 32px; color: #0f172a; margin-bottom: 10px; font-weight: 800; letter-spacing:-0.5px;}
+        h2 { text-align: center; font-size: 16px; color: #64748b; margin-bottom: 50px; font-weight: 500; }
+        
+        svg { display: block; margin: 0 auto; background: #fafafa; border: 1px solid #e2e8f0; border-radius: 8px;}
+        
+        .box { fill: #ffffff; stroke: #334155; stroke-width: 2px; rx: 6px; }
+        .box-header { fill: #f8fafc; stroke: #334155; stroke-width: 2px; rx: 6px; }
+        .box-div { stroke: #cbd5e1; stroke-width: 1px; }
+        .box-div-heavy { stroke: #334155; stroke-width: 2px; }
+        
+        .line { stroke: #475569; stroke-width: 1.8px; fill: none; }
+        .line-dashed { stroke-dasharray: 6 6; stroke: #64748b; stroke-width: 1.5px; fill: none; }
+        .line-assoc { stroke: #94a3b8; stroke-width: 1.2px; fill: none;}
+        
+        .txt-title { font-weight: 700; font-size: 15px; text-anchor: middle; fill: #0f172a; }
+        .txt-sub { font-weight: 500; font-size: 11px; text-anchor: middle; fill: #64748b; }
+        
+        .txt-attr { font-size: 12.5px; fill: #334155; font-family: 'Roboto Mono', monospace;}
+        .txt-meth { font-size: 12.5px; fill: #0369a1; font-weight: 600; font-family: 'Roboto Mono', monospace;}
+        
+        .lbl-bg { fill: rgba(255, 255, 255, 0.95); rx: 4px;}
+        .lbl-txt { font-size: 12px; fill: #1e293b; font-weight: 700; text-anchor: middle; font-style: italic;}
+        .lbl-mult { font-size: 11.5px; fill: #dc2626; font-weight: 800; text-anchor: middle;}
+    </style>
+</head>
+<body>
+
+<div class="canvas-container">
+    <h1>Architecture Orientée Base de Données — GeoTrack V2</h1>
+    <h2>Diagramme de Classes UML (Modèle Physique de Données & Logique Métier de PostgreSQL)</h2>
+    
+    <svg width="1850" height="1100" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <!-- Aggregation (Empty Diamond) -->
+            <marker id="diamond" viewBox="0 0 20 12" refX="20" refY="6" markerWidth="14" markerHeight="10" orient="auto">
+                <polygon points="10,0 20,6 10,12 0,6" fill="white" stroke="#334155" stroke-width="1.8" />
+            </marker>
+            <!-- Composition (Filled Diamond) -->
+            <marker id="diamond-filled" viewBox="0 0 20 12" refX="20" refY="6" markerWidth="14" markerHeight="10" orient="auto">
+                <polygon points="10,0 20,6 10,12 0,6" fill="#0f172a" stroke="#0f172a" stroke-width="1.8" />
+            </marker>
+            <!-- Simple Directed Arrow -->
+            <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="10" markerHeight="10" orient="auto">
+                <path d="M 0 0 L 10 5 L 0 10" fill="none" stroke="#475569" stroke-width="1.8" />
+            </marker>
+        </defs>
+
+        <!-- ======================================================= -->
+        <!--                   LINES & RELATIONSHIPS                 -->
+        <!-- ======================================================= -->
+        
+        <!-- Entreprise (850, 50) -> Utilisateur (450, 300) [1..*] -->
+        <polyline points="850,150 590,150 590,300" class="line" marker-start="url(#diamond)" />
+        <rect x="670" y="140" width="80" height="20" class="lbl-bg" /><text x="710" y="154" class="lbl-txt">"Emploie"</text>
+        <text x="835" y="143" class="lbl-mult">1</text><text x="605" y="293" class="lbl-mult">1..*</text>
+
+        <!-- Entreprise -> Commande (500, 50) [1..*] -->
+        <line x1="850" y1="100" x2="780" y2="100" class="line" marker-start="url(#diamond)" />
+        <rect x="790" y="80" width="50" height="20" class="lbl-bg" /><text x="815" y="94" class="lbl-txt">"Passe"</text>
+        <text x="835" y="115" class="lbl-mult">1</text><text x="795" y="115" class="lbl-mult">0..*</text>
+
+        <!-- Entreprise -> RegleNotification (1200, 50) [1..*] -->
+        <line x1="1130" y1="120" x2="1220" y2="120" class="line" marker-start="url(#diamond)" />
+        <rect x="1140" y="100" width="60" height="20" class="lbl-bg" /><text x="1170" y="114" class="lbl-txt">"Définit"</text>
+        <text x="1145" y="135" class="lbl-mult">1</text><text x="1205" y="135" class="lbl-mult">0..*</text>
+
+        <!-- Entreprise -> TraceurGPS (850, 350) [1..*] -->
+        <line x1="990" y1="280" x2="990" y2="350" class="line" marker-start="url(#diamond)" />
+        <rect x="1000" y="305" width="50" height="20" class="lbl-bg" /><text x="1025" y="318" class="lbl-txt">"Gère"</text>
+        <text x="975" y="300" class="lbl-mult">1</text><text x="975" y="345" class="lbl-mult">0..*</text>
+
+        <!-- Entreprise -> ZoneGPS (1250, 350) [1..*] -->
+        <polyline points="1130,220 1390,220 1390,350" class="line" marker-start="url(#diamond)" />
+        <rect x="1220" y="210" width="80" height="20" class="lbl-bg" /><text x="1260" y="224" class="lbl-txt">"Configure"</text>
+        <text x="1150" y="215" class="lbl-mult">1</text><text x="1410" y="340" class="lbl-mult">0..*</text>
+
+        <!-- Utilisateur (450, 300) -> Paiement (100, 50) [1..*] -->
+        <line x1="450" y1="360" x2="380" y2="360" class="line" marker-start="url(#diamond)" />
+        <!-- Wait, Paiement is at 100, 50. Let's fix line -->
+        <polyline points="450,330 240,330 240,290" class="line" marker-start="url(#diamond)" />
+        <rect x="300" y="313" width="80" height="20" class="lbl-bg" /><text x="340" y="326" class="lbl-txt">"Exécute"</text>
+        <text x="435" y="325" class="lbl-mult">1</text><text x="255" y="285" class="lbl-mult">0..*</text>
+        
+        <!-- Utilisateur -> TicketSupport (100, 350) [1..*] -->
+        <line x1="450" y1="410" x2="380" y2="410" class="line" marker-start="url(#diamond)" />
+        <rect x="385" y="390" width="60" height="20" class="lbl-bg" /><text x="415" y="403" class="lbl-txt">"Crée"</text>
+        <text x="435" y="425" class="lbl-mult">1</text><text x="395" y="425" class="lbl-mult">0..*</text>
+
+        <!-- Utilisateur -> JournalAudit (450, 650) [1..*] -->
+        <line x1="590" y1="560" x2="590" y2="650" class="line" />
+        <rect x="600" y="590" width="60" height="20" class="lbl-bg" /><text x="630" y="603" class="lbl-txt">"Trace"</text>
+        <text x="575" y="580" class="lbl-mult">1</text><text x="575" y="640" class="lbl-mult">0..*</text>
+
+        <!-- TicketSupport (100, 350) -> MessageSupport (100, 580) [Composition 1..*] -->
+        <line x1="240" y1="530" x2="240" y2="600" class="line" marker-start="url(#diamond-filled)" />
+        <rect x="250" y="555" width="70" height="20" class="lbl-bg" /><text x="285" y="568" class="lbl-txt">"Possède"</text>
+        <text x="225" y="550" class="lbl-mult">1</text><text x="225" y="590" class="lbl-mult">1..*</text>
+
+        <!-- TraceurGPS (850, 350) -> HistoriquePosition (850, 800) [Composition 1..*] -->
+        <line x1="990" y1="730" x2="990" y2="800" class="line" marker-start="url(#diamond-filled)" />
+        <rect x="1000" y="755" width="70" height="20" class="lbl-bg" /><text x="1035" y="768" class="lbl-txt">"Produit"</text>
+        <text x="975" y="750" class="lbl-mult">1</text><text x="975" y="790" class="lbl-mult">0..*</text>
+
+        <!-- TraceurGPS -> ZoneGPS (1250, 350) [*..*] -->
+        <line x1="1130" y1="460" x2="1250" y2="460" class="line" />
+        <rect x="1140" y="440" width="100" height="20" class="lbl-bg" /><text x="1190" y="453" class="lbl-txt">"Est surveillé par"</text>
+        <text x="1140" y="475" class="lbl-mult">*</text><text x="1240" y="475" class="lbl-mult">*</text>
+        
+        <!-- TraceurGPS -> Alerte (1250, 750) [Composition 1..*] -->
+        <polyline points="1130,680 1390,680 1390,750" class="line" marker-start="url(#diamond-filled)" />
+        <rect x="1200" y="670" width="80" height="20" class="lbl-bg" /><text x="1240" y="684" class="lbl-txt">"Déclenche"</text>
+        <text x="1145" y="675" class="lbl-mult">1</text><text x="1405" y="740" class="lbl-mult">0..*</text>
+
+        <!-- Utilisateur -> Alerte (Lecture / alert_reads table) [*..*] -->
+        <polyline points="590,560 590,1050 1390,1050 1390,950" class="line-dashed" marker-end="url(#arrow)" />
+        <rect x="910" y="1040" width="160" height="20" class="lbl-bg" /><text x="990" y="1053" class="lbl-txt">"Acquitte/Lit (alert_reads)"</text>
+        <text x="605" y="585" class="lbl-mult">*</text><text x="1410" y="965" class="lbl-mult">*</text>
+
+
+        <!-- ======================================================= -->
+        <!--                     BOX GENERATION MACROS               -->
+        <!-- ======================================================= -->
+
+        <!-- 1. Entreprise (850, 50, W:280, H:230) -->
+        <g id="Entreprise">
+            <rect x="850" y="50" width="280" height="230" class="box" />
+            <rect x="850" y="50" width="280" height="40" class="box-header" />
+            <line x1="850" y1="90" x2="1130" y2="90" class="box-div-heavy" />
+            <text x="990" y="71" class="txt-title">Entreprise (Tenant)</text>
+            <text x="990" y="85" class="txt-sub">table: enterprises</text>
+
+            <text x="860" y="110" class="txt-attr">- id: UUID</text>
+            <text x="860" y="128" class="txt-attr">- name: String</text>
+            <text x="860" y="146" class="txt-attr">- contact_email: String</text>
+            <text x="860" y="164" class="txt-attr">- plan: Enum(starter, pro)</text>
+            <text x="860" y="182" class="txt-attr">- status: String</text>
+            <line x1="850" y1="195" x2="1130" y2="195" class="box-div" />
+            <text x="860" y="215" class="txt-meth">+ getAppareilsActifs(): Int</text>
+        </g>
+
+        <!-- 2. Utilisateur (450, 300, W:280, H:260) -->
+        <g id="Utilisateur">
+            <rect x="450" y="300" width="280" height="260" class="box" />
+            <rect x="450" y="300" width="280" height="40" class="box-header" />
+            <line x1="450" y1="340" x2="730" y2="340" class="box-div-heavy" />
+            <text x="590" y="321" class="txt-title">Utilisateur</text>
+            <text x="590" y="335" class="txt-sub">table: users</text>
+
+            <text x="460" y="360" class="txt-attr">- id: UUID</text>
+            <text x="460" y="378" class="txt-attr">- email: String</text>
+            <text x="460" y="396" class="txt-attr">- password: Hash</text>
+            <text x="460" y="414" class="txt-attr">- role: Enum(Admin, Op, Sup)</text>
+            <text x="460" y="432" class="txt-attr">- enterprise_id: UUID [FK]</text>
+            <text x="460" y="450" class="txt-attr">- last_login: Timestamp</text>
+            <text x="460" y="468" class="txt-attr">- email_verified: Boolean</text>
+            <line x1="450" y1="480" x2="730" y2="480" class="box-div" />
+            <text x="460" y="500" class="txt-meth">+ authentifier(pwd): JWT</text>
+            <text x="460" y="520" class="txt-meth">+ valider2FA(code): Bool</text>
+            <text x="460" y="540" class="txt-meth">+ modifierRole(Role)</text>
+        </g>
+
+        <!-- 3. TraceurGPS (850, 350, W:280, H:380) -->
+        <g id="TraceurGPS">
+            <rect x="850" y="350" width="280" height="380" class="box" />
+            <rect x="850" y="350" width="280" height="40" class="box-header" />
+            <line x1="850" y1="390" x2="1130" y2="390" class="box-div-heavy" />
+            <text x="990" y="371" class="txt-title">TraceurGPS (Appareil IoT)</text>
+            <text x="990" y="385" class="txt-sub">table: devices</text>
+
+            <text x="860" y="410" class="txt-attr">- id: UUID</text>
+            <text x="860" y="428" class="txt-attr">- imei: String (Unique)</text>
+            <text x="860" y="446" class="txt-attr">- name: String</text>
+            <text x="860" y="464" class="txt-attr">- device_type: String</text>
+            <text x="860" y="482" class="txt-attr">- status: Enum(on, off)</text>
+            <text x="860" y="500" class="txt-attr">- location_lat: Double</text>
+            <text x="860" y="518" class="txt-attr">- location_lng: Double</text>
+            <text x="860" y="536" class="txt-attr">- speed: Double</text>
+            <text x="860" y="554" class="txt-attr">- battery: Double</text>
+            <text x="860" y="572" class="txt-attr">- ignition: Boolean</text>
+            <text x="860" y="590" class="txt-attr">- odometer: Double</text>
+            <text x="860" y="608" class="txt-attr">- fuel_level: Double</text>
+            <text x="860" y="626" class="txt-attr">- enterprise_id: UUID [FK]</text>
+            <line x1="850" y1="640" x2="1130" y2="640" class="box-div" />
+            <text x="860" y="660" class="txt-meth">+ majTelemetry(JSON): Bool</text>
+            <text x="860" y="680" class="txt-meth">+ verifierGeofences(): Void</text>
+            <text x="860" y="700" class="txt-meth">+ activerCoupeMoteur()</text>
+        </g>
+
+        <!-- 4. ZoneGPS (1250, 350, W:280, H:250) -->
+        <g id="ZoneGPS">
+            <rect x="1250" y="350" width="280" height="250" class="box" />
+            <rect x="1250" y="350" width="280" height="40" class="box-header" />
+            <line x1="1250" y1="390" x2="1530" y2="390" class="box-div-heavy" />
+            <text x="1390" y="371" class="txt-title">ZoneGPS (Geofence)</text>
+            <text x="1390" y="385" class="txt-sub">table: geofences</text>
+
+            <text x="1260" y="410" class="txt-attr">- id: UUID</text>
+            <text x="1260" y="428" class="txt-attr">- name: String</text>
+            <text x="1260" y="446" class="txt-attr">- type: Enum(Circle, Poly)</text>
+            <text x="1260" y="464" class="txt-attr">- radius: Double</text>
+            <text x="1260" y="482" class="txt-attr">- polygon: JSON (Path)</text>
+            <text x="1260" y="500" class="txt-attr">- alert_on_exit: Boolean</text>
+            <text x="1260" y="518" class="txt-attr">- alert_on_entry: Boolean</text>
+            <text x="1260" y="536" class="txt-attr">- enterprise_id: UUID [FK]</text>
+            <line x1="1250" y1="550" x2="1530" y2="550" class="box-div" />
+            <text x="1260" y="570" class="txt-meth">+ checkInside(lat, lng): Bool</text>
+        </g>
+
+        <!-- 5. HistoriquePosition (850, 800, W:280, H:250) -->
+        <g id="HistoriquePosition">
+            <rect x="850" y="800" width="280" height="250" class="box" />
+            <rect x="850" y="800" width="280" height="40" class="box-header" />
+            <line x1="850" y1="840" x2="1130" y2="840" class="box-div-heavy" />
+            <text x="990" y="821" class="txt-title">HistoriquePosition</text>
+            <text x="990" y="835" class="txt-sub">table: device_history</text>
+
+            <text x="860" y="860" class="txt-attr">- id: UUID</text>
+            <text x="860" y="878" class="txt-attr">- device_id: UUID [FK]</text>
+            <text x="860" y="896" class="txt-attr">- location_lat: Double</text>
+            <text x="860" y="914" class="txt-attr">- location_lng: Double</text>
+            <text x="860" y="932" class="txt-attr">- speed: Double</text>
+            <text x="860" y="950" class="txt-attr">- battery: Double</text>
+            <text x="860" y="968" class="txt-attr">- signal: Double</text>
+            <text x="860" y="986" class="txt-attr">- timestamp: Timestamp</text>
+            <line x1="850" y1="1000" x2="1130" y2="1000" class="box-div" />
+            <text x="860" y="1020" class="txt-meth">+ genererGeoJSONRoute()</text>
+        </g>
+
+        <!-- 6. Alerte (1250, 750, W:280, H:200) -->
+        <g id="Alerte">
+            <rect x="1250" y="750" width="280" height="200" class="box" />
+            <rect x="1250" y="750" width="280" height="40" class="box-header" />
+            <line x1="1250" y1="790" x2="1530" y2="790" class="box-div-heavy" />
+            <text x="1390" y="771" class="txt-title">Alerte</text>
+            <text x="1390" y="785" class="txt-sub">table: alerts</text>
+
+            <text x="1260" y="810" class="txt-attr">- id: UUID</text>
+            <text x="1260" y="828" class="txt-attr">- device_id: UUID [FK]</text>
+            <text x="1260" y="846" class="txt-attr">- type: Enum(SOS, Speed..)</text>
+            <text x="1260" y="864" class="txt-attr">- severity: String</text>
+            <text x="1260" y="882" class="txt-attr">- message: String</text>
+            <text x="1260" y="900" class="txt-attr">- created_at: Timestamp</text>
+            <line x1="1250" y1="915" x2="1530" y2="915" class="box-div" />
+            <text x="1260" y="935" class="txt-meth">+ notifierWebsocket()</text>
+        </g>
+
+        <!-- 7. Commande (500, 50, W:280, H:220) -->
+        <g id="Commande">
+            <rect x="500" y="50" width="280" height="230" class="box" />
+            <rect x="500" y="50" width="280" height="40" class="box-header" />
+            <line x1="500" y1="90" x2="780" y2="90" class="box-div-heavy" />
+            <text x="640" y="71" class="txt-title">Commande (Onboarding)</text>
+            <text x="640" y="85" class="txt-sub">table: orders</text>
+
+            <text x="510" y="110" class="txt-attr">- id: UUID</text>
+            <text x="510" y="128" class="txt-attr">- full_name: String</text>
+            <text x="510" y="146" class="txt-attr">- company: String</text>
+            <text x="510" y="164" class="txt-attr">- gps_count: Int</text>
+            <text x="510" y="182" class="txt-attr">- plan: String</text>
+            <text x="510" y="200" class="txt-attr">- status: Enum(pending..)</text>
+            <text x="510" y="218" class="txt-attr">- total_due_today: Double</text>
+            <line x1="500" y1="235" x2="780" y2="235" class="box-div" />
+            <text x="510" y="255" class="txt-meth">+ traiterCreationCompte()</text>
+        </g>
+
+        <!-- 8. Paiement (100, 50, W:280, H:240) -->
+        <g id="Paiement">
+            <rect x="100" y="50" width="280" height="240" class="box" />
+            <rect x="100" y="50" width="280" height="40" class="box-header" />
+            <line x1="100" y1="90" x2="380" y2="90" class="box-div-heavy" />
+            <text x="240" y="71" class="txt-title">Paiement / Facture</text>
+            <text x="240" y="85" class="txt-sub">table: payments</text>
+
+            <text x="110" y="110" class="txt-attr">- id: UUID</text>
+            <text x="110" y="128" class="txt-attr">- user_id: UUID [FK]</text>
+            <text x="110" y="146" class="txt-attr">- amount: Double</text>
+            <text x="110" y="164" class="txt-attr">- status: String</text>
+            <text x="110" y="182" class="txt-attr">- billing_cycle: String</text>
+            <text x="110" y="200" class="txt-attr">- due_date: Timestamp</text>
+            <text x="110" y="218" class="txt-attr">- invoice_ref: String</text>
+            <line x1="100" y1="235" x2="380" y2="235" class="box-div" />
+            <text x="110" y="255" class="txt-meth">+ emettreFacturePDF()</text>
+            <text x="110" y="275" class="txt-meth">+ verifierStripe()</text>
+        </g>
+
+        <!-- 9. RegleNotification (1220, 50, W:280, H:180) -->
+        <g id="RegleNotification">
+            <rect x="1220" y="50" width="280" height="180" class="box" />
+            <rect x="1220" y="50" width="280" height="40" class="box-header" />
+            <line x1="1220" y1="90" x2="1500" y2="90" class="box-div-heavy" />
+            <text x="1360" y="71" class="txt-title">Règle Notification</text>
+            <text x="1360" y="85" class="txt-sub">table: notification_rules</text>
+
+            <text x="1230" y="110" class="txt-attr">- id: UUID</text>
+            <text x="1230" y="128" class="txt-attr">- alert_type: String</text>
+            <text x="1230" y="146" class="txt-attr">- emails: String[]</text>
+            <text x="1230" y="164" class="txt-attr">- is_active: Boolean</text>
+            <line x1="1220" y1="180" x2="1500" y2="180" class="box-div" />
+            <text x="1230" y="200" class="txt-meth">+ parserEtEnvoyerEmail()</text>
+        </g>
+
+        <!-- 10. TicketSupport (100, 350, W:280, H:180) -->
+        <g id="TicketSupport">
+            <rect x="100" y="350" width="280" height="180" class="box" />
+            <rect x="100" y="350" width="280" height="40" class="box-header" />
+            <line x1="100" y1="390" x2="380" y2="390" class="box-div-heavy" />
+            <text x="240" y="371" class="txt-title">Ticket Support</text>
+            <text x="240" y="385" class="txt-sub">table: support_tickets</text>
+
+            <text x="110" y="410" class="txt-attr">- id: UUID</text>
+            <text x="110" y="428" class="txt-attr">- user_id: UUID [FK]</text>
+            <text x="110" y="446" class="txt-attr">- subject: String</text>
+            <text x="110" y="464" class="txt-attr">- status: Enum(Open, Closed)</text>
+            <text x="110" y="482" class="txt-attr">- last_message_at: Timestamp</text>
+            <line x1="100" y1="495" x2="380" y2="495" class="box-div" />
+            <text x="110" y="515" class="txt-meth">+ cloturerTicket()</text>
+        </g>
+
+        <!-- 11. MessageSupport (100, 600, W:280, H:160) -->
+        <g id="MessageSupport">
+            <rect x="100" y="600" width="280" height="160" class="box" />
+            <rect x="100" y="600" width="280" height="40" class="box-header" />
+            <line x1="100" y1="640" x2="380" y2="640" class="box-div-heavy" />
+            <text x="240" y="621" class="txt-title">Message Support</text>
+            <text x="240" y="635" class="txt-sub">table: support_messages</text>
+
+            <text x="110" y="660" class="txt-attr">- id: UUID</text>
+            <text x="110" y="678" class="txt-attr">- ticket_id: UUID [FK]</text>
+            <text x="110" y="696" class="txt-attr">- sender_role: String</text>
+            <text x="110" y="714" class="txt-attr">- message: Text</text>
+            <line x1="100" y1="725" x2="380" y2="725" class="box-div" />
+            <text x="110" y="745" class="txt-meth">+ notifierAdminWebsocket()</text>
+        </g>
+
+        <!-- 12. JournalAudit (450, 650, W:280, H:220) -->
+        <g id="JournalAudit">
+            <rect x="450" y="650" width="280" height="220" class="box" />
+            <rect x="450" y="650" width="280" height="40" class="box-header" />
+            <line x1="450" y1="690" x2="730" y2="690" class="box-div-heavy" />
+            <text x="590" y="671" class="txt-title">Journal d'Audit</text>
+            <text x="590" y="685" class="txt-sub">table: audit_logs</text>
+
+            <text x="460" y="710" class="txt-attr">- id: UUID</text>
+            <text x="460" y="728" class="txt-attr">- action: String</text>
+            <text x="460" y="746" class="txt-attr">- user_id: UUID [FK]</text>
+            <text x="460" y="764" class="txt-attr">- target_type: String</text>
+            <text x="460" y="782" class="txt-attr">- target_name: String</text>
+            <text x="460" y="800" class="txt-attr">- ip: String</text>
+            <text x="460" y="818" class="txt-attr">- details: JSONB</text>
+            <line x1="450" y1="835" x2="730" y2="835" class="box-div" />
+            <text x="460" y="855" class="txt-meth">+ parserActionJson()</text>
+        </g>
+
+    </svg>
+</div>
+
+</body>
+</html>

@@ -1,4 +1,4 @@
-import { Device } from '@/lib/mock-data';
+import { Device } from '@/lib/types';
 import DeviceCard from './DeviceCard';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
@@ -21,8 +21,8 @@ const DeviceList = ({ devices, selectedDevice, onDeviceSelect, compact = false }
       <div className="p-4 space-y-3 border-b border-border/50">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input 
-            placeholder="Rechercher un véhicule..."
+          <Input
+            placeholder="Rechercher un appareil..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10 bg-secondary/50 border-0 focus-visible:ring-1"
@@ -43,12 +43,12 @@ const DeviceList = ({ devices, selectedDevice, onDeviceSelect, compact = false }
           </SelectContent>
         </Select>
       </div>
-      
+
       <ScrollArea className="flex-1">
         <div className={compact ? "p-2 space-y-1" : "p-4 space-y-3"}>
           {devices.length === 0 ? (
             <p className="text-center text-muted-foreground py-8">
-              Aucun véhicule trouvé
+              Aucun appareil trouvé
             </p>
           ) : (
             devices.map((device) => (
@@ -63,10 +63,10 @@ const DeviceList = ({ devices, selectedDevice, onDeviceSelect, compact = false }
           )}
         </div>
       </ScrollArea>
-      
+
       <div className="p-3 border-t border-border/50 bg-secondary/30">
         <p className="text-xs text-muted-foreground text-center">
-          {devices.length} véhicule{devices.length !== 1 ? 's' : ''} affiché{devices.length !== 1 ? 's' : ''}
+          {devices.length} appareil{devices.length !== 1 ? 's' : ''} affiché{devices.length !== 1 ? 's' : ''}
         </p>
       </div>
     </div>

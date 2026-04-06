@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAppStore } from '@/lib/store';
-import { User } from '@/lib/mock-data';
+import { User } from '@/lib/types';
 import { toast } from 'sonner';
 
 interface UserFormModalProps {
@@ -22,7 +22,9 @@ const UserFormModal = ({ open, onClose, user }: UserFormModalProps) => {
     name: '',
     email: '',
     role: 'operator' as User['role'],
+    plan: 'starter' as string,
     enterpriseId: '',
+    password: '',
   });
 
   useEffect(() => {
@@ -31,42 +33,47 @@ const UserFormModal = ({ open, onClose, user }: UserFormModalProps) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        plan: (user as any).plan || 'starter',
         enterpriseId: user.enterpriseId || '',
+        password: '',
       });
     } else {
       setFormData({
         name: '',
         email: '',
         role: 'operator',
+        plan: 'starter',
         enterpriseId: '',
+        password: 'demo123',
       });
     }
   }, [user, open]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const enterprise = enterprises.find(e => e.id === formData.enterpriseId);
 
-    if (isEditing && user) {
-      updateUser(user.id, {
-        ...formData,
-        enterpriseName: enterprise?.name,
-      });
-      toast.success('Utilisateur mis à jour avec succès');
-    } else {
-      const newUser: User = {
-        id: `user-${Date.now()}`,
-        ...formData,
-        enterpriseName: enterprise?.name,
-        createdAt: new Date().toISOString().split('T')[0],
-        lastLogin: new Date().toISOString(),
-      };
-      addUser(newUser);
-      toast.success('Utilisateur créé avec succès');
+    try {
+      if (isEditing && user) {
+        await updateUser(user.id, {
+          ...formData,
+          enterpriseName: enterprise?.name,
+        });
+        toast.success('Utilisateur mis à jour avec succès');
+      } else {
+        await addUser({
+          ...formData,
+          enterpriseName: enterprise?.name,
+          avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${formData.name}`,
+        });
+        toast.success('Utilisateur créé avec succès');
+      }
+      onClose();
+    } catch (err) {
+      console.error('Error saving user:', err);
+      toast.error("Échec de l'enregistrement de l'utilisateur");
     }
-    
-    onClose();
   };
 
   return (
@@ -77,7 +84,7 @@ const UserFormModal = ({ open, onClose, user }: UserFormModalProps) => {
             {isEditing ? 'Modifier l\'utilisateur' : 'Nouvel utilisateur'}
           </DialogTitle>
         </DialogHeader>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="name">Nom complet</Label>
@@ -106,7 +113,7 @@ const UserFormModal = ({ open, onClose, user }: UserFormModalProps) => {
             <Label>Rôle</Label>
             <Select
               value={formData.role}
-              onValueChange={(value: User['role']) => 
+              onValueChange={(value: User['role']) =>
                 setFormData({ ...formData, role: value })
               }
             >
@@ -122,24 +129,53 @@ const UserFormModal = ({ open, onClose, user }: UserFormModalProps) => {
           </div>
 
           {formData.role === 'operator' && (
-            <div className="space-y-2">
-              <Label>Entreprise</Label>
-              <Select
-                value={formData.enterpriseId}
-                onValueChange={(value) => setFormData({ ...formData, enterpriseId: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Sélectionner une entreprise" />
-                </SelectTrigger>
-                <SelectContent>
-                  {enterprises.map((ent) => (
-                    <SelectItem key={ent.id} value={ent.id}>
-                      {ent.name}
+            <>
+              <div className="space-y-2">
+                <Label>Plan</Label>
+                <Select
+                  value={formData.plan}
+                  onValueChange={(value) => setFormData({ ...formData, plan: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="starter">
+                      <span className="flex items-center gap-2">📦 Starter</span>
                     </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+                    <SelectItem value="pro">
+                      <span className="flex items-center gap-2">🚀 Pro</span>
+                    </SelectItem>
+                    <SelectItem value="enterprise">
+                      <span className="flex items-center gap-2">⭐ Enterprise</span>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-[10px] text-muted-foreground">
+                  {formData.plan === 'starter' ? 'Accès: Dashboard, Carte, Appareils, Alertes'
+                    : formData.plan === 'pro' ? 'Accès: Tout Starter + Géofences, Support, Paramètres'
+                      : 'Accès complet à toutes les fonctionnalités'}
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label>Entreprise</Label>
+                <Select
+                  value={formData.enterpriseId}
+                  onValueChange={(value) => setFormData({ ...formData, enterpriseId: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sélectionner une entreprise" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {enterprises.map((ent) => (
+                      <SelectItem key={ent.id} value={ent.id}>
+                        {ent.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </>
           )}
 
           <DialogFooter>

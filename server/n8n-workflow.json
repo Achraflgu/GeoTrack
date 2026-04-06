@@ -1,0 +1,110 @@
+{
+    "name": "GeoTrack AI Chat Agent",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "geotrack-chat",
+                "responseMode": "lastNode",
+                "options": {}
+            },
+            "id": "webhook-trigger",
+            "name": "Chat Webhook",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2,
+            "position": [
+                200,
+                300
+            ],
+            "webhookId": "geotrack-chat"
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "={{ $json.body.chatInput }}",
+                "options": {
+                    "systemMessage": "You are GeoTrack's commercial assistant (GPS tracking in Tunisia). ALWAYS reply in 2-3 sentences max. Be direct, clear, warm.\n\nLANGUAGE RULE (CRITICAL): If user writes in English, reply ONLY in English. If user writes in French, reply ONLY in French. Match the user's language exactly.\n\nSTRICT RULES:\n- Max 3 sentences per reply\n- No bullet lists unless user asks for pricing\n- Only 1 question at the end, never more\n- Never repeat what user already said\n- Use 1-2 emojis max\n\nKEY INFO:\n- GPS for: vehicles, motorcycles, trucks, people, children, animals, objects\n- Tracker: 110 TND/unit, Installation: 40 TND (flat fee), Delivery: FREE\n- Starter (1-5 GPS): 49 TND/month/GPS\n- Pro (6-50): 39 TND/month/GPS\n- Enterprise (50+): custom quote\n- Discounts: -10% (6 months), -20% (annual)\n- Security deposit: first 3 months upfront\n- Trackers: IP67 waterproof, 30-day battery, GPS+GLONASS, 2G/4G\n- Contact: +216 71 000 000, contact@geotrack.tn\n- Free demo on website, no signup needed\n\nORDER FLOW: Collect one by one: 1)GPS count 2)types 3)name+company 4)email+phone. Then short summary with price.\n\nGOOD EXAMPLE (English):\nUser: I want GPS for my car\nAssistant: Yes it's available! 🚗 Our GPS trackers work for all vehicle types. How many do you need?\n\nGOOD EXAMPLE (French):\nUser: je veux gps pour ma voiture\nAssistant: Oui c'est disponible ! 🚗 Nos traceurs GPS fonctionnent pour tous types de véhicules. Combien en voulez-vous ?\n\nBAD EXAMPLE (too long):\nAssistant: Hello! Great question. Yes, we have several options... [long list] To give you a more precise answer..."
+                }
+            },
+            "id": "ai-agent",
+            "name": "AI Agent",
+            "type": "@n8n/n8n-nodes-langchain.agent",
+            "typeVersion": 1.7,
+            "position": [
+                500,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "model": "gemma3:1b",
+                "baseUrl": "http://localhost:11434",
+                "options": {
+                    "temperature": 0.5,
+                    "numPredict": 150
+                }
+            },
+            "id": "ollama-model",
+            "name": "Ollama Chat Model",
+            "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+            "typeVersion": 1,
+            "position": [
+                400,
+                500
+            ]
+        },
+        {
+            "parameters": {
+                "sessionIdType": "customKey",
+                "sessionKey": "={{ $json.body.sessionId }}",
+                "contextWindowLength": 20
+            },
+            "id": "memory-buffer",
+            "name": "Window Buffer Memory",
+            "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+            "typeVersion": 1.3,
+            "position": [
+                550,
+                500
+            ]
+        }
+    ],
+    "connections": {
+        "Chat Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "AI Agent",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Ollama Chat Model": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "AI Agent",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Window Buffer Memory": {
+            "ai_memory": [
+                [
+                    {
+                        "node": "AI Agent",
+                        "type": "ai_memory",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1"
+    }
+}

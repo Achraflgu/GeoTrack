@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>GeoTrack - Tracker GPS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      min-height: 100vh;
+      color: #f8fafc;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 400px;
+      width: 100%;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .logo {
+      width: 64px;
+      height: 64px;
+      background: linear-gradient(135deg, #10b981, #059669);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      font-size: 28px;
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .subtitle {
+      color: #94a3b8;
+      font-size: 14px;
+    }
+
+    .card {
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.1);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 16px;
+      backdrop-filter: blur(10px);
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 100px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .status-waiting {
+      background: rgba(234, 179, 8, 0.2);
+      color: #fbbf24;
+    }
+
+    .status-active {
+      background: rgba(16, 185, 129, 0.2);
+      color: #10b981;
+    }
+
+    .status-error {
+      background: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+    }
+
+    .pulse {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: currentColor;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 0.5;
+        transform: scale(1.2);
+      }
+    }
+
+    .data-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .data-item {
+      background: rgba(15, 23, 42, 0.5);
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    .data-label {
+      font-size: 12px;
+      color: #94a3b8;
+      margin-bottom: 4px;
+    }
+
+    .data-value {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .device-info {
+      text-align: center;
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+      margin-bottom: 16px;
+    }
+
+    .device-name {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .enterprise-name {
+      color: #94a3b8;
+      font-size: 14px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .error-message {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      border-radius: 12px;
+      padding: 16px;
+      color: #fca5a5;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .update-log {
+      font-size: 12px;
+      color: #64748b;
+      text-align: center;
+      margin-top: 16px;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logo">📍</div>
+      <h1>GeoTrack</h1>
+      <p class="subtitle">Suivi GPS en temps réel</p>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loading" class="card">
+      <div style="text-align: center;">
+        <div class="status-badge status-waiting">
+          <div class="pulse"></div>
+          Chargement...
+        </div>
+      </div>
+    </div>
+
+    <!-- Error State -->
+    <div id="error-section" class="hidden">
+      <div class="error-message" id="error-message"></div>
+    </div>
+
+    <!-- Device Info -->
+    <div id="device-section" class="hidden">
+      <div class="card">
+        <div class="device-info">
+          <div class="device-name" id="device-name">--</div>
+          <div class="enterprise-name" id="enterprise-name">--</div>
+        </div>
+
+        <div style="text-align: center; margin-bottom: 16px;">
+          <div class="status-badge" id="status-badge">
+            <div class="pulse"></div>
+            <span id="status-text">En attente</span>
+          </div>
+        </div>
+
+        <div class="data-grid">
+          <div class="data-item">
+            <div class="data-label">Latitude</div>
+            <div class="data-value" id="lat">--</div>
+          </div>
+          <div class="data-item">
+            <div class="data-label">Longitude</div>
+            <div class="data-value" id="lng">--</div>
+          </div>
+          <div class="data-item">
+            <div class="data-label">Vitesse</div>
+            <div class="data-value"><span id="speed">0</span> km/h</div>
+          </div>
+          <div class="data-item">
+            <div class="data-label">Batterie</div>
+            <div class="data-value"><span id="battery">--</span>%</div>
+          </div>
+        </div>
+
+        <p class="update-log" id="update-log">Dernière mise à jour: --</p>
+      </div>
+
+      <button class="btn btn-primary" id="start-btn" onclick="startTracking()">
+        🚀 Démarrer le suivi
+      </button>
+
+      <button class="btn btn-danger hidden" id="stop-btn" onclick="stopTracking()">
+        ⏹️ Arrêter le suivi
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // Configuration
+    const API_BASE = window.location.origin;
+
+    // Get token from URL
+    const pathParts = window.location.pathname.split('/');
+    const token = pathParts[pathParts.length - 1] || new URLSearchParams(window.location.search).get('token');
+
+    let watchId = null;
+    let isTracking = false;
+    let updateCount = 0;
+    let lastKnownData = null;
+
+    // DOM elements
+    const loadingEl = document.getElementById('loading');
+    const errorSection = document.getElementById('error-section');
+    const errorMessage = document.getElementById('error-message');
+    const deviceSection = document.getElementById('device-section');
+    const startBtn = document.getElementById('start-btn');
+    const stopBtn = document.getElementById('stop-btn');
+    const statusBadge = document.getElementById('status-badge');
+    const statusText = document.getElementById('status-text');
+
+    // Show error
+    function showError(message) {
+      loadingEl.classList.add('hidden');
+      deviceSection.classList.add('hidden');
+      errorSection.classList.remove('hidden');
+      errorMessage.textContent = message;
+    }
+
+    // Show device
+    function showDevice(info) {
+      loadingEl.classList.add('hidden');
+      errorSection.classList.add('hidden');
+      deviceSection.classList.remove('hidden');
+      document.getElementById('device-name').textContent = info.deviceName;
+      document.getElementById('enterprise-name').textContent = info.enterpriseName;
+    }
+
+    // Update status
+    function setStatus(status, className) {
+      statusBadge.className = 'status-badge ' + className;
+      statusText.textContent = status;
+    }
+
+    // Get device info
+    async function getDeviceInfo() {
+      if (!token) {
+        showError('Token de suivi manquant. Veuillez utiliser le lien fourni par votre administrateur.');
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE}/api/track/${token}/info`);
+        if (!response.ok) {
+          throw new Error('Token invalide');
+        }
+        const info = await response.json();
+        showDevice(info);
+      } catch (error) {
+        showError('Token invalide ou expiré. Contactez votre administrateur.');
+      }
+    }
+
+    // Send position to server
+    async function sendPosition(position) {
+      const data = {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+        speed: position.coords.speed ? Math.round(position.coords.speed * 3.6) : 0, // m/s to km/h
+        heading: position.coords.heading || 0,
+        altitude: position.coords.altitude,
+        accuracy: position.coords.accuracy
+      };
+
+      // Try to get battery level
+      if (navigator.getBattery) {
+        try {
+          const battery = await navigator.getBattery();
+          data.battery = Math.round(battery.level * 100);
+          document.getElementById('battery').textContent = data.battery;
+        } catch (e) { }
+      }
+
+      // Save for last-gasp offline signal
+      lastKnownData = data;
+
+      // Update UI
+      document.getElementById('lat').textContent = data.lat.toFixed(5);
+      document.getElementById('lng').textContent = data.lng.toFixed(5);
+      document.getElementById('speed').textContent = data.speed;
+
+      try {
+        const response = await fetch(`${API_BASE}/api/track/${token}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+          updateCount++;
+          document.getElementById('update-log').textContent =
+            `Dernière mise à jour: ${new Date().toLocaleTimeString()} (#${updateCount})`;
+          setStatus('Suivi actif', 'status-active');
+        }
+      } catch (error) {
+        console.error('Failed to send position:', error);
+      }
+    }
+
+    // Start tracking
+    function startTracking() {
+      if (!navigator.geolocation) {
+        showError('La géolocalisation n\'est pas supportée par ce navigateur.');
+        return;
+      }
+
+      setStatus('Demande de permission...', 'status-waiting');
+
+      const options = {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      };
+
+      watchId = navigator.geolocation.watchPosition(
+        (position) => {
+          sendPosition(position);
+          isTracking = true;
+          startBtn.classList.add('hidden');
+          stopBtn.classList.remove('hidden');
+        },
+        (error) => {
+          let message = 'Erreur de géolocalisation';
+          switch (error.code) {
+            case error.PERMISSION_DENIED:
+              message = 'Permission refusée. Veuillez autoriser la localisation.';
+              break;
+            case error.POSITION_UNAVAILABLE:
+              message = 'Position indisponible.';
+              break;
+            case error.TIMEOUT:
+              message = 'Délai dépassé.';
+              break;
+          }
+          setStatus(message, 'status-error');
+        },
+        options
+      );
+    }
+
+    // Stop tracking
+    function stopTracking() {
+      if (watchId !== null) {
+        navigator.geolocation.clearWatch(watchId);
+        watchId = null;
+      }
+      isTracking = false;
+      setStatus('Suivi arrêté', 'status-waiting');
+      startBtn.classList.remove('hidden');
+      stopBtn.classList.add('hidden');
+    }
+
+    // Immediate offline signal when closing
+    window.addEventListener('pagehide', () => {
+      if (!token || !lastKnownData || !isTracking) return;
+
+      const offlineData = JSON.stringify({
+        ...lastKnownData,
+        status: 'offline'
+      });
+
+      navigator.sendBeacon(`${API_BASE}/api/track/${token}`, offlineData);
+    });
+
+    // Initialize
+    getDeviceInfo();
+  </script>
+</body>
+
+</html>
