@@ -30,6 +30,7 @@ import {
   Crown,
   Mail
 } from 'lucide-react';
+import AynTraceLogo from '@/components/brand/AynTraceLogo';
 
 const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);

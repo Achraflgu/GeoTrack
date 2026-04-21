@@ -137,6 +137,17 @@ const LoginPage = () => {
           </div>
         </div>
 
+        <div className="absolute inset-0 bg-grid-pattern bg-grid opacity-10" />
+
+        <Link to="/" className="relative z-10 block group hover:opacity-90 transition-all">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-xl bg-[#00E599]/20 backdrop-blur-sm flex items-center justify-center group-hover:bg-[#00E599]/30 transition-colors">
+              <Radio className="w-6 h-6 text-[#00E599]" />
+            </div>
+            <span className="text-2xl font-bold text-white tracking-tight">GeoTrack</span>
+          </div>
+        </Link>
+
         <div className="relative z-10 space-y-6">
           <h1 className="text-4xl font-bold text-white leading-tight">
             Plateforme de<br />

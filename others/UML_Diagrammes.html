@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GeoTrack — Diagramme de Cas d'Utilisation UML</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #f5f5f5;
+      font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px 20px;
+    }
+
+    .page-title {
+      font-size: 20px;
+      font-weight: bold;
+      color: #111;
+      margin-bottom: 4px;
+    }
+
+    .page-sub {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 20px;
+    }
+
+    .canvas-wrap {
+      background: #fff;
+      border: 1px solid #ccc;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+      padding: 20px;
+      border-radius: 8px;
+    }
+
+    .btn-row {
+      margin-top: 20px;
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn {
+      padding: 10px 28px;
+      background: #333;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background: #555;
+    }
+
+    @media print {
+      body {
+        background: #fff;
+        padding: 0;
+      }
+
+      .page-title,
+      .page-sub,
+      .btn-row {
+        display: none;
+      }
+
+      .canvas-wrap {
+        border: none;
+        box-shadow: none;
+        padding: 0;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="page-title">GeoTrack — Diagramme de Cas d'Utilisation UML</div>
+  <div class="page-sub">Modélisation Fonctionnelle Pure · Héritage Structural Conforme UML 2.x</div>
+
+  <div class="canvas-wrap">
+    <svg width="1250" height="1410" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <!-- Include arrow (blue dashed line tip) -->
+        <marker id="ai" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+          <polyline points="0,1 7,4 0,7" fill="none" stroke="#2563eb" stroke-width="1.2" />
+        </marker>
+        <!-- Extend arrow (purple dashed) -->
+        <marker id="ae" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+          <polyline points="0,1 7,4 0,7" fill="none" stroke="#7c3aed" stroke-width="1.2" />
+        </marker>
+        <!-- Generalization arrow (hollow triangle) -->
+        <marker id="gen" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+          <polygon points="0,1 10,6 0,11" fill="#fff" stroke="#222" stroke-width="1.5" />
+        </marker>
+        <!-- External association arrow -->
+        <marker id="ext" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+          <polyline points="0,1 7,4 0,7" fill="none" stroke="#333" stroke-width="1.2" />
+        </marker>
+        <marker id="ext-s" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+          <polyline points="0,1 7,4 0,7" fill="none" stroke="#6366f1" stroke-width="1.2" />
+        </marker>
+      </defs>
+
+      <!-- ════════════════════════════════════════════════════════════════ -->
+      <!--  SYSTEM BOUNDARY                                                 -->
+      <!-- ════════════════════════════════════════════════════════════════ -->
+      <rect x="230" y="30" width="800" height="1280" rx="4" fill="none" stroke="#222" stroke-width="2" />
+      <text x="630" y="55" text-anchor="middle" font-size="16" font-weight="bold" fill="#111">Système GeoTrack</text>
+
+      <!-- Section tags -->
+      <text x="245" y="75" font-size="11" font-weight="bold" fill="#aaa" letter-spacing="1">GESTION PUBLIQUE &
+        ACCÈS</text>
+      <line x1="230" y1="450" x2="1030" y2="450" stroke="#e5e5e5" stroke-width="1" stroke-dasharray="5,4" />
+      <text x="245" y="455" font-size="11" font-weight="bold" fill="#aaa" letter-spacing="1">ESPACE UTILISATEUR
+        COMMUN</text>
+      <line x1="230" y1="830" x2="1030" y2="830" stroke="#e5e5e5" stroke-width="1" stroke-dasharray="5,4" />
+      <text x="245" y="845" font-size="11" font-weight="bold" fill="#aaa" letter-spacing="1">FONCTIONNALITÉS AVANCÉES &
+        ADMIN</text>
+
+      <!-- ════════════════════════════════════════════════════════════════ -->
+      <!--  ACTORS (LEFT)                                                   -->
+      <!-- ════════════════════════════════════════════════════════════════ -->
+
+      <!-- Visiteur -->
+      <g transform="translate(100,250)">
+        <circle cx="0" cy="-20" r="12" fill="none" stroke="#222" stroke-width="1.5" />
+        <line x1="0" y1="-8" x2="0" y2="18" stroke="#222" stroke-width="1.5" />
+        <line x1="-16" y1="0" x2="16" y2="0" stroke="#222" stroke-width="1.5" />
+        <line x1="0" y1="18" x2="-14" y2="42" stroke="#222" stroke-width="1.5" />
+        <line x1="0" y1="18" x2="14" y2="42" stroke="#222" stroke-width="1.5" />
+        <text x="0" y="60" text-anchor="middle" font-size="12" font-weight="bold" fill="#111">Visiteur</text>
+        <text x="0" y="74" text-anchor="middle" font-size="9" fill="#666" font-style="italic">(Non authentifié)</text>
+      </g>
+
+      <!-- Utilisateur Global -->
+      <g transform="translate(100,640)">
+        <circle cx="0" cy="-20" r="12" fill="#fff" stroke="#10b981" stroke-width="2" />
+        <line x1="0" y1="-8" x2="0" y2="18" stroke="#10b981" stroke-width="2" />
+        <line x1="-16" y1="0" x2="16" y2="0" stroke="#10b981" stroke-width="2" />
+        <line x1="0" y1="18" x2="-14" y2="42" stroke="#10b981" stroke-width="2" />
+        <line x1="0" y1="18" x2="14" y2="42" stroke="#10b981" stroke-width="2" />
+        <text x="0" y="60" text-anchor="middle" font-size="12" font-weight="bold" fill="#10b981">Utilisateur</text>
+        <text x="0" y="74" text-anchor="middle" font-size="9" fill="#10b981" font-style="italic">(Connecté)</text>
+      </g>
+
+      <!-- Opérateur -->
+      <g transform="translate(100,880)">
+        <circle cx="0" cy="-20" r="12" fill="none" stroke="#222" stroke-width="1.5" />
+        <line x1="0" y1="-8" x2="0" y2="18" stroke="#222" stroke-width="1.5" />
+        <line x1="-16" y1="0" x2="16" y2="0" stroke="#222" stroke-width="1.5" />
+        <line x1="0" y1="18" x2="-14" y2="42" stroke="#222" stroke-width="1.5" />
+        <line x1="0" y1="18" x2="14" y2="42" stroke="#222" stroke-width="1.5" />
+        <text x="0" y="60" text-anchor="middle" font-size="12" font-weight="bold" fill="#111">Opérateur</text>
+      </g>
+
+      <!-- Superviseur -->
+      <g transform="translate(100,1060)">
+        <circle cx="0" cy="-20" r="12" fill="none" stroke="#222" stroke-width="1.5" />
+        <line x1="0" y1="-8" x2="0" y2="18" stroke="#222" stroke-width="1.5" />
+        <line x1="-16" y1="0" x2="16" y2="0" stroke="#222" stroke-width="1.5" />
+        <line x1="0" y1="18" x2="-14" y2="42" stroke="#222" stroke-width="1.5" />
+        <line x1="0" y1="18" x2="14" y2="42" stroke="#222" stroke-width="1.5" />
+        <text x="0" y="60" text-anchor="middle" font-size="12" font-weight="bold" fill="#111">Superviseur</text>
+      </g>
+
+      <!-- Administrateur -->
+      <g transform="translate(100,1180)">
+        <circle cx="0" cy="-20" r="12" fill="none" stroke="#222" stroke-width="1.5" />
+        <line x1="0" y1="-8" x2="0" y2="18" stroke="#222" stroke-width="1.5" />
+        <line x1="-16" y1="0" x2="16" y2="0" stroke="#222" stroke-width="1.5" />
+        <line x1="0" y1="18" x2="-14" y2="42" stroke="#222" stroke-width="1.5" />
+        <line x1="0" y1="18" x2="14" y2="42" stroke="#222" stroke-width="1.5" />
+        <text x="0" y="60" text-anchor="middle" font-size="12" font-weight="bold" fill="#111">Administrateur</text>
+      </g>
+
+      <!-- Actor Inheritance (UML Explicit Trunk into Hand) -->
+      <line x1="40" y1="1180" x2="40" y2="640" stroke="#222" stroke-width="1.5" />
+      <line x1="85" y1="880" x2="40" y2="880" stroke="#222" stroke-width="1.5" />
+      <line x1="85" y1="1060" x2="40" y2="1060" stroke="#222" stroke-width="1.5" />
+      <line x1="85" y1="1180" x2="40" y2="1180" stroke="#222" stroke-width="1.5" />
+      <line x1="40" y1="640" x2="80" y2="640" stroke="#222" stroke-width="1.5" marker-end="url(#gen)" />
+
+
+      <!-- ════════════════════════════════════════════════════════════════ -->
+      <!--  EXTERNAL SYSTEMS (RIGHT)                                        -->
+      <!-- ════════════════════════════════════════════════════════════════ -->
+
+      <!-- n8n -->
+      <g transform="translate(1080,280)">
+        <rect x="-35" y="-18" width="70" height="36" rx="3" fill="#fff" stroke="#222" stroke-width="1.5" />
+        <text x="0" y="1" text-anchor="middle" font-size="11" font-weight="bold" fill="#111">n8n & ollama</text>
+        <text x="0" y="13" text-anchor="middle" font-size="8" fill="#777">Assistant IA</text>
+      </g>
+
+      <!-- Mailjet -->
+      <g transform="translate(1080,540)">
+        <rect x="-35" y="-18" width="70" height="36" rx="3" fill="#fff" stroke="#222" stroke-width="1.5" />
+        <text x="0" y="1" text-anchor="middle" font-size="11" font-weight="bold" fill="#111">✉️ Mailjet</text>
+        <text x="0" y="13" text-anchor="middle" font-size="8" fill="#777">Service Email</text>
+      </g>
+
+      <!-- Stripe -->
+      <g transform="translate(1080,1000)">
+        <rect x="-35" y="-18" width="70" height="36" rx="3" fill="#fcfcfc" stroke="#6366f1" stroke-width="1.5" />
+        <text x="0" y="1" text-anchor="middle" font-size="11" font-weight="bold" fill="#6366f1">💳 Stripe</text>
+        <text x="0" y="13" text-anchor="middle" font-size="8" fill="#818cf8">Plateforme Paiement</text>
+      </g>
+
+
+      <!-- ════════════════════════════════════════════════════════════════ -->
+      <!--  USE CASES (CENTER COLUMN)                                       -->
+      <!-- ════════════════════════════════════════════════════════════════ -->
+
+      <!-- Zone Publique -->
+      <ellipse cx="480" cy="110" rx="140" ry="22" fill="#fff" stroke="#222" stroke-width="1.3" />
+      <text x="480" y="114" text-anchor="middle" font-size="12" font-weight="bold" fill="#111">Consulter le site
+        public</text>
+
+      <ellipse cx="480" cy="170" rx="140" ry="22" fill="#fff" stroke="#222" stroke-width="1.3" />
+      <text x="480" y="174" text-anchor="middle" font-size="12" font-weight="bold" fill="#111">Commander des traceurs
+        GPS</text>
+
+      <ellipse cx="480" cy="230" rx="140" ry="22" fill="#fff" stroke="#222" stroke-width="1.3" />
+      <text x="480" y="234" text-anchor="middle" font-size="12" font-weight="bold" fill="#111">Suivre sa commande</text>
+
+      <ellipse cx="480" cy="290" rx="140" ry="22" fill="#fff" stroke="#222" stroke-width="1.3" />
+      <text x="480" y="294" text-anchor="middle" font-size="12" font-weight="bold" fill="#111">Interagir avec
+        l'assistant public</text>
+
+      <ellipse cx="480" cy="350" rx="140" ry="22" fill="#fff" stroke="#222" stroke-width="1.3" />
+      <text x="480" y="354" text-anchor="middle" font-size="12" font-weight="bold" fill="#111">Réinitialiser son mot de
+        passe</text>
+
+      <ellipse cx="480" cy="410" rx="140" ry="22" fill="#fffff0" stroke="#b8860b" stroke-width="1.5" />
+      <text x="480" y="414" text-anchor="middle" font-size="12" font-weight="bold" fill="#111">S'authentifier</text>
+
+      <!-- Zone Utilisateur Commun -->
+      <ellipse cx="480" cy="490" rx="140" ry="22" fill="#fff" stroke="#10b981" stroke-width="1.3" />
+      <text x="480" y="494" text-anchor="middle" font-size="12" font-weight="bold" fill="#111">Consulter le tableau de
+        bord</text>
+
+      <ellipse cx="480" cy="550" rx="140" ry="22" fill="#fff" stroke="#10b981" stroke-width="1.3" />
+      <text x="480" y="554" text-anchor="middle" font-size="12" font-weight="bold" fill="#111">Gérer son profil</text>
+
+      <ellipse cx="480" cy="610" rx="140" ry="22" fill="#fff" stroke="#10b981" stroke-width="1.3" />
+      <text x="480" y="614" text-anchor="middle" font-size="12" font-weight="bold" fill="#111">Suivre la flotte de
+        véhicules</text>
+
+      <ellipse cx="480" cy="670" rx="140" ry="22" fill="#fff" stroke="#10b981" stroke-width="1.3" />
+      <text x="480" y="674" text-anchor="middle" font-size="12" font-weight="bold" fill="#111">Gérer les appareils
+        GPS</text>
+
+      <ellipse cx="480" cy="730" rx="140" ry="22" fill="#fff" stroke="#10b981" stroke-width="1.3" />
+      <text x="480" y="734" text-anchor="middle" font-size="12" font-weight="bold" fill="#111">Gérer les alertes</text>
+
+      <ellipse cx="480" cy="790" rx="140" ry="22" fill="#fff" stroke="#10b981" stroke-width="1.3" />
+      <text x="480" y="794" text-anchor="middle" font-size="12" font-weight="bold" fill="#111">Gérer les tickets de
+        support</text>
+
+      <!-- Zone Restreinte -->
+      <ellipse cx="480" cy="880" rx="140" ry="22" fill="#fff" stroke="#222" stroke-width="1.3" />
+      <text x="480" y="884" text-anchor="middle" font-size="12" font-weight="bold" fill="#111">Interagir avec
+        l'assistant IA
+        (Interne)</text>
+
+      <ellipse cx="480" cy="940" rx="140" ry="22" fill="#fff" stroke="#222" stroke-width="1.3" />
+      <text x="480" y="944" text-anchor="middle" font-size="12" font-weight="bold" fill="#111">Délimiter les zones
+        géocloturées</text>
+
+      <ellipse cx="480" cy="1000" rx="140" ry="22" fill="#fff" stroke="#222" stroke-width="1.3" />
+      <text x="480" y="1004" text-anchor="middle" font-size="12" font-weight="bold" fill="#111">Gérer la facturation &
+        abonnements</text>
+
+      <ellipse cx="480" cy="1060" rx="140" ry="22" fill="#fff" stroke="#222" stroke-width="1.3" />
+      <text x="480" y="1064" text-anchor="middle" font-size="12" font-weight="bold" fill="#111">Consulter les
+        entreprises
+        clientes</text>
+
+      <ellipse cx="480" cy="1120" rx="140" ry="22" fill="#fff" stroke="#222" stroke-width="1.3" />
+      <text x="480" y="1124" text-anchor="middle" font-size="12" font-weight="bold" fill="#111">Gérer les
+        utilisateurs</text>
+
+      <ellipse cx="480" cy="1180" rx="140" ry="22" fill="#fff" stroke="#222" stroke-width="1.3" />
+      <text x="480" y="1184" text-anchor="middle" font-size="12" font-weight="bold" fill="#111">Gérer les
+        commandes</text>
+
+      <ellipse cx="480" cy="1240" rx="140" ry="22" fill="#fff" stroke="#222" stroke-width="1.3" />
+      <text x="480" y="1244" text-anchor="middle" font-size="12" font-weight="bold" fill="#111">Tracer les journaux
+        d'audit</text>
+
+      <!-- Extensions (Right Column) -->
+      <ellipse cx="830" cy="170" rx="120" ry="22" fill="#fff" stroke="#222" stroke-width="1.3" />
+      <text x="830" y="174" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#111">Effectuer le
+        paiement</text>
+
+      <ellipse cx="830" cy="730" rx="120" ry="22" fill="#fff" stroke="#7c3aed" stroke-width="1.3"
+        stroke-dasharray="4,3" />
+      <text x="830" y="734" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#111">Envoyer une
+        notification</text>
+
+      <!-- Note: Condition Pro -->
+      <path d="M 480 950 L 480 910" stroke="#ccc" stroke-width="1" stroke-dasharray="2,2" />
+      <rect x="650" y="915" width="230" height="20" rx="2" fill="#fffbdd" stroke="#eab308" stroke-width="1" />
+      <text x="755" y="928" text-anchor="middle" font-size="9" fill="#111">Certaines fonctionnalités nécessitent Plan
+        Pro</text>
+      <path d="M 650 925 L 610 925" stroke="#eab308" stroke-width="0.8" stroke-dasharray="2,2" />
+
+
+      <!-- ════════════════════════════════════════════════════════════════ -->
+      <!--  ASSOCIATIONS                                                    -->
+      <!-- ════════════════════════════════════════════════════════════════ -->
+
+      <!-- Visiteur -->
+      <line x1="120" y1="250" x2="340" y2="110" stroke="#333" stroke-width="1.1" />
+      <line x1="120" y1="250" x2="340" y2="170" stroke="#333" stroke-width="1.1" />
+      <line x1="120" y1="250" x2="340" y2="230" stroke="#333" stroke-width="1.1" />
+      <line x1="120" y1="250" x2="340" y2="290" stroke="#333" stroke-width="1.1" />
+      <line x1="120" y1="250" x2="340" y2="350" stroke="#333" stroke-width="1.1" />
+      <line x1="120" y1="250" x2="340" y2="410" stroke="#333" stroke-width="1.1" />
+
+      <!-- Utilisateur -->
+      <line x1="120" y1="640" x2="340" y2="410" stroke="#10b981" stroke-width="1.1" />
+      <line x1="120" y1="640" x2="340" y2="490" stroke="#10b981" stroke-width="1.1" />
+      <line x1="120" y1="640" x2="340" y2="550" stroke="#10b981" stroke-width="1.1" />
+      <line x1="120" y1="640" x2="340" y2="610" stroke="#10b981" stroke-width="1.1" />
+      <line x1="120" y1="640" x2="340" y2="670" stroke="#10b981" stroke-width="1.1" />
+      <line x1="120" y1="640" x2="340" y2="730" stroke="#10b981" stroke-width="1.1" />
+      <line x1="120" y1="640" x2="340" y2="790" stroke="#10b981" stroke-width="1.1" />
+
+      <!-- Opérateur -->
+      <line x1="120" y1="880" x2="340" y2="880" stroke="#333" stroke-width="1.1" />
+      <line x1="120" y1="880" x2="340" y2="940" stroke="#333" stroke-width="1.1" />
+      <line x1="120" y1="880" x2="340" y2="1000" stroke="#333" stroke-width="1.1" />
+
+      <!-- Superviseur -->
+      <line x1="120" y1="1060" x2="340" y2="1060" stroke="#333" stroke-width="1.1" />
+
+      <!-- Admin -->
+      <line x1="120" y1="1180" x2="340" y2="880" stroke="#333" stroke-width="1.1" />
+      <line x1="120" y1="1180" x2="340" y2="940" stroke="#333" stroke-width="1.1" />
+      <line x1="120" y1="1180" x2="340" y2="1060" stroke="#333" stroke-width="1.1" />
+      <line x1="120" y1="1180" x2="340" y2="1120" stroke="#333" stroke-width="1.1" />
+      <line x1="120" y1="1180" x2="340" y2="1180" stroke="#333" stroke-width="1.1" />
+      <line x1="120" y1="1180" x2="340" y2="1240" stroke="#333" stroke-width="1.1" />
+
+      <!-- ════════════════════════════════════════════════════════════════ -->
+      <!-- EXTEND / INCLUDE & EXTERNAL LINKS                               -->
+      <!-- ════════════════════════════════════════════════════════════════ -->
+
+      <!-- Include: Dashboard -> S'authentifier -->
+      <line x1="480" y1="468" x2="480" y2="432" stroke="#2563eb" stroke-width="1.3" stroke-dasharray="6,4"
+        marker-end="url(#ai)" />
+      <text x="515" y="454" text-anchor="middle" font-size="10" font-weight="600" font-style="italic"
+        fill="#2563eb">«include»</text>
+
+      <!-- Include: Commander traceurs -> Effectuer paiement -->
+      <line x1="620" y1="170" x2="710" y2="170" stroke="#2563eb" stroke-width="1.3" stroke-dasharray="6,4"
+        marker-end="url(#ai)" />
+      <text x="665" y="163" text-anchor="middle" font-size="10" font-weight="600" font-style="italic"
+        fill="#2563eb">«include»</text>
+
+      <!-- Extend: Envoyer Notification -> Gérer les alertes -->
+      <line x1="710" y1="730" x2="620" y2="730" stroke="#7c3aed" stroke-width="1.3" stroke-dasharray="6,4"
+        marker-end="url(#ae)" />
+      <text x="665" y="723" text-anchor="middle" font-size="10" font-weight="600" font-style="italic"
+        fill="#7c3aed">«extend»</text>
+
+      <!-- Constraints Note -->
+      <rect x="655" y="750" width="160" height="20" rx="2" fill="#faf5ff" stroke="#d8b4fe" stroke-width="0.8" />
+      <text x="735" y="763" text-anchor="middle" font-size="9" fill="#6b21a8">[Condition : Alerte déclenchée]</text>
+
+      <!-- External: Assistant Public -> n8n -->
+      <polyline points="620,290 1038,290" fill="none" stroke="#333" stroke-width="1.1" />
+      <polyline points="620,880 1000,880 1000,300 1038,300" fill="none" stroke="#333" stroke-width="1.1" />
+
+      <!-- External: Reset Password -> Mailjet -->
+      <polyline points="620,350 980,350 980,530 1038,530" fill="none" stroke="#333" stroke-width="1.1" />
+
+      <!-- External: Send Notification -> Mailjet -->
+      <polyline points="950,730 980,730 980,550 1038,550" fill="none" stroke="#333" stroke-width="1.1" />
+
+      <!-- External: Validate orders (email sent) -> Mailjet -->
+      <polyline points="620,1180 980,1180 980,540 1038,540" fill="none" stroke="#333" stroke-width="1.1" />
+
+      <!-- External: Billing -> Stripe -->
+      <polyline points="620,1000 1038,1000" fill="none" stroke="#6366f1" stroke-width="1.1" />
+
+      <!-- External: Order Payment -> Stripe -->
+      <polyline points="950,170 960,170 960,990 1038,990" fill="none" stroke="#6366f1" stroke-width="1.1" />
+
+
+      <!-- ════════════════════════════════════════════════════════════════ -->
+      <!--  LEGEND                                                          -->
+      <!-- ════════════════════════════════════════════════════════════════ -->
+      <rect x="230" y="1315" width="800" height="30" rx="2" fill="#f9f9f9" stroke="#ddd" stroke-width="1" />
+
+      <circle cx="248" cy="1330" r="5" fill="none" stroke="#222" stroke-width="1.2" />
+      <line x1="248" y1="1335" x2="248" y2="1340" stroke="#222" stroke-width="1" />
+      <text x="262" y="1334" font-size="9" fill="#555">Acteur</text>
+
+      <ellipse cx="320" cy="1330" rx="14" ry="8" fill="#fff" stroke="#222" stroke-width="1" />
+      <text x="340" y="1334" font-size="9" fill="#555">Cas d'utilisation</text>
+
+      <line x1="450" y1="1330" x2="480" y2="1330" stroke="#333" stroke-width="1.1" />
+      <text x="490" y="1334" font-size="9" fill="#555">Association</text>
+
+      <line x1="560" y1="1330" x2="590" y2="1330" stroke="#2563eb" stroke-width="1.2" stroke-dasharray="5,3"
+        marker-end="url(#ai)" />
+      <text x="610" y="1334" font-size="9" fill="#2563eb" font-style="italic">«include»</text>
+
+      <line x1="680" y1="1330" x2="710" y2="1330" stroke="#7c3aed" stroke-width="1.2" stroke-dasharray="5,3"
+        marker-end="url(#ae)" />
+      <text x="730" y="1334" font-size="9" fill="#7c3aed" font-style="italic">«extend»</text>
+
+      <line x1="800" y1="1330" x2="830" y2="1330" stroke="#222" stroke-width="1.2" marker-end="url(#gen)" />
+      <text x="850" y="1334" font-size="9" fill="#555">Héritage</text>
+
+      <rect x="910" y="1322" width="22" height="16" rx="2" fill="#fff" stroke="#333" stroke-width="1" />
+      <text x="940" y="1334" font-size="9" fill="#555">Système Externe</text>
+
+    </svg>
+  </div>
+
+</body>
+
+</html>

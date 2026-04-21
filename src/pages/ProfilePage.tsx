@@ -187,19 +187,43 @@ const ProfilePage = () => {
                 <div className="grid gap-4 sm:grid-cols-3">
                   <div className="space-y-2">
                     <Label htmlFor="current-password">Mot de passe actuel</Label>
-                    <Input
-                      id="current-password"
-                      type="password"
-                      placeholder="••••••••"
-                    />
+                    <div className="relative">
+                      <Input
+                        id="current-password"
+                        type={showCurrentPassword ? "text" : "password"}
+                        value={currentPassword}
+                        onChange={(e) => setCurrentPassword(e.target.value)}
+                        placeholder="••••••••"
+                        className="pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        {showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="new-password">Nouveau mot de passe</Label>
-                    <Input
-                      id="new-password"
-                      type="password"
-                      placeholder="••••••••"
-                    />
+                    <div className="relative">
+                      <Input
+                        id="new-password"
+                        type={showNewPassword ? "text" : "password"}
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        placeholder="••••••••"
+                        className="pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowNewPassword(!showNewPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="confirm-password">Confirmer</Label>

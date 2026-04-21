@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoTrack — Diagrammes de Séquence UML</title>
+    <!-- Inclure la police Inter (style GeoTrack) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f7f9fc;
+            --card-bg: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --primary: #2563eb;
+            --border: #e5e7eb;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            font-size: 16px;
+            color: var(--text-muted);
+            max-width: 600px;
+        }
+
+        .diagram-container {
+            width: 100%;
+            max-width: 1000px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+            border: 1px solid var(--border);
+            margin-bottom: 60px;
+            overflow: hidden;
+        }
+
+        .diagram-header {
+            padding: 20px 30px;
+            border-bottom: 1px solid var(--border);
+            background: #fcfcfd;
+            display: flex;
+            align-items: center;
+        }
+
+        .diagram-number {
+            background: var(--primary);
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 16px;
+            margin-right: 16px;
+        }
+
+        .diagram-title h2 {
+            margin: 0;
+            font-size: 18px;
+            color: #111827;
+        }
+
+        .diagram-title p {
+            margin: 4px 0 0 0;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .mermaid {
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+            background: #ffffff;
+            overflow-x: auto;
+        }
+
+        .notes-box {
+            max-width: 1000px;
+            width: 100%;
+            background: #eff6ff;
+            border-left: 4px solid var(--primary);
+            padding: 16px 20px;
+            margin-bottom: 40px;
+            border-radius: 4px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>GeoTrack — Diagrammes de Séquence UML</h1>
+        <p>Modélisation comportementale des 5 processus métier critiques de la plateforme par appels asynchrones (WebSocket) et synchrones (REST API).</p>
+    </div>
+
+    <!-- SÉQUENCE 1 -->
+    <div class="diagram-container">
+        <div class="diagram-header">
+            <div class="diagram-number">1</div>
+            <div class="diagram-title">
+                <h2>Suivi GPS en Temps Réel (Core)</h2>
+                <p>Processus continu d'envoi des coordonnées, d'enregistrement en base et de diffusion WebSocket.</p>
+            </div>
+        </div>
+        <div class="mermaid">
+sequenceDiagram
+    autonumber
+    actor D as Traceur GPS (Simulateur)
+    participant API as API REST (/api/track)
+    participant DB as PostgreSQL (Knex)
+    participant WS as Serveur WebSocket
+    actor C as Client React (Opérateur)
+
+    C->>WS: Connexion WebSocket (auth JWT)
+    WS-->>C: Connecté (Room entreprise)
+
+    rect rgb(248, 250, 252)
+    note right of D: Boucle asynchrone (toutes les 5s)
+    D->>+API: POST /api/track {lat, lng, speed}
+    API->>+DB: UPDATE devices SET position
+    DB-->>-API: Succès (1 row)
+    API->>+DB: INSERT INTO device_history
+    DB-->>-API: Succès (1 row)
+    API-->>WS: emit('device-moved', payload)
+    deactivate API
+    WS-->>C: Broadcast: event 'device-moved'
+    C->>C: Zustand Store: updateDevice()
+    C->>C: Leaflet Map: Animer marqueur
+    end
+        </div>
+    </div>
+
+    <!-- SÉQUENCE 2 -->
+    <div class="diagram-container">
+        <div class="diagram-header">
+            <div class="diagram-number">2</div>
+            <div class="diagram-title">
+                <h2>Détection et Notification d'une Alerte (Geofencing)</h2>
+                <p>Calcul géospatial, déclenchement d'alerte métier et notification multi-canal (WS + Email).</p>
+            </div>
+        </div>
+        <div class="mermaid">
+sequenceDiagram
+    autonumber
+    participant Engine as Moteur Simulation
+    participant GeoLogic as Logique Geofence
+    participant DB as PostgreSQL
+    participant WS as Serveur WebSocket
+    participant Mail as API Mailjet (SMTP)
+
+    Engine->>+DB: SELECT zones FROM geofences WHERE enterprise_id
+    DB-->>-Engine: Polygons & Cercles
+    
+    Engine->>+GeoLogic: checkIntersection(position_gps, zones)
+    GeoLogic-->>-Engine: RESULTAT: Sortie de zone (EXIT)
+    
+    Engine->>+DB: INSERT INTO alerts (type: 'geofence', severity: 'high')
+    DB-->>-Engine: Alerte créée {id}
+    
+    par Push Temps Réel Temps
+        Engine-->>WS: emit('new-alert', alert_data)
+        WS-->>Client React: Affichage d'un toast notification (Popup)
+    and Push Email Asynchrone
+        Engine->>+DB: SELECT emails FROM notification_rules WHERE type='geofence'
+        DB-->>-Engine: Liste de diffusion [array]
+        Engine->>+Mail: sendEmail(template_alerte, destinataires)
+        Mail-->>-Engine: HTTP 200 OK (Email expédié)
+    end
+        </div>
+    </div>
+
+    <!-- SÉQUENCE 3 -->
+    <div class="diagram-container">
+        <div class="diagram-header">
+            <div class="diagram-number">3</div>
+            <div class="diagram-title">
+                <h2>Interaction Chatbot IA Contextuel</h2>
+                <p>Passage d'une question utilisateur via l'API, concaténation du contexte base de données et orchestration n8n vers Ollama.</p>
+            </div>
+        </div>
+        <div class="mermaid">
+sequenceDiagram
+    autonumber
+    actor Admin
+    participant React as React (Dashboard)
+    participant API as API (/api/dashboard-chat)
+    participant DB as PostgreSQL
+    participant n8n as Serveur n8n (Webhook)
+    participant Ollama as Modèle Ollama local
+
+    Admin->>React: Pose question "Appareils hors ligne ?"
+    React->>+API: POST {message: "..."}
+    
+    API->>+DB: SELECT COUNT(*) FROM devices WHERE status='offline'
+    DB-->>-API: Résultat {count: 12}
+    API->>+DB: SELECT données globales (Alerte, Commandes)
+    DB-->>-API: Contexte riche jsonb
+    
+    API->>API: Préparation System Prompt injecté avec contexte
+    
+    API->>+n8n: POST vers Webhook {system_prompt, user_msg}
+    n8n->>+Ollama: Requête LLM Inférence
+    Ollama-->>-n8n: "Il y a actuellement 12 traceurs hors ligne."
+    n8n-->>-API: Réponse formatée
+    
+    API-->>-React: 200 OK {response: "..."}
+    React-->>Admin: Affichage bulle chat IA
+        </div>
+    </div>
+
+    <!-- SÉQUENCE 4 -->
+    <div class="diagram-container">
+        <div class="diagram-header">
+            <div class="diagram-number">4</div>
+            <div class="diagram-title">
+                <h2>Workflow de Traitement de Commande B2B</h2>
+                <p>Processus administratif déclenchant la génération massive de ressources en cascade (compte, entreprise, appareils).</p>
+            </div>
+        </div>
+        <div class="mermaid">
+sequenceDiagram
+    autonumber
+    actor Admin
+    participant React as Panel Admin
+    participant API as API /api/orders
+    participant DB as PostgreSQL
+    participant Mail as API Mailjet
+
+    Admin->>React: Clique "Activer commande N°123"
+    React->>+API: PATCH /api/orders/123/status {status: 'active'}
+    
+    API->>+DB: UPDATE orders SET status='active' WHERE id=123
+    DB-->>-API: OK
+    
+    API->>+DB: INSERT INTO enterprises (name, plan)
+    DB-->>-API: Retourne enterprise_id
+    
+    API->>+DB: INSERT INTO users (role='operator', hash)
+    DB-->>-API: Retourne user_id
+    
+    loop Pour N appareils commandés
+        API->>API: Génération auto IMEI & Numéro de série (ex: GT-0001)
+        API->>+DB: INSERT INTO devices (enterprise_id, imei)
+        DB-->>-API: OK
+    end
+    
+    API->>+Mail: sendWelcomeEmail(credentials, login_link)
+    Mail-->>-API: 200 OK
+    
+    API-->>-React: 200 OK (Activation réussie)
+    React-->>Admin: Rafraichissement UI, statut "Actif"
+        </div>
+    </div>
+
+    <!-- SÉQUENCE 5 -->
+    <div class="diagram-container">
+        <div class="diagram-header">
+            <div class="diagram-number">5</div>
+            <div class="diagram-title">
+                <h2>Authentification JWT & Contrôle d'Accès (RBAC)</h2>
+                <p>Délivrance de Token crypté, vérification sur Middleware et Scope au niveau BDD.</p>
+            </div>
+        </div>
+        <div class="mermaid">
+sequenceDiagram
+    autonumber
+    actor User as Opérateur
+    participant UI as React Frontend
+    participant Auth as Auth Controller
+    participant Mid as Middleware JWT (requireRole)
+    participant Res as Ressource (Geofences)
+    participant DB as PostgreSQL
+
+    rect rgb(250, 250, 250)
+    note right of User: Phase 1 : Login
+    User->>UI: Saisie email + mot de passe
+    UI->>+Auth: POST /api/auth/login
+    Auth->>+DB: SELECT * FROM users WHERE email
+    DB-->>-Auth: row.hash (bcrypt)
+    Auth->>Auth: valid = bcrypt.compare(pass, hash)
+    Auth->>Auth: token = jwt.sign({id, role, enterpriseId})
+    Auth-->>-UI: 200 OK {token}
+    UI->>UI: Zustand: setToken(token) en mémoire
+    end
+    
+    rect rgb(240, 253, 244)
+    note right of User: Phase 2 : Accès Restreint
+    User->>UI: Clique "Geofences (Plan Pro)"
+    UI->>UI: PlanRoute Check: user.plan == "pro" ? (OUI)
+    UI->>+Mid: GET /api/geofences (Header: Bearer token)
+    Mid->>Mid: jwt.verify() -> Décodage valide
+    Mid->>Mid: checkRole(['admin', 'operator']) -> Opérateur OK
+    Mid->>+Res: next() -> Lance le Contrôleur
+    Res->>+DB: SELECT * FROM geofences WHERE enterprise_id
+    DB-->>-Res: Zones appartenant à l'entreprise
+    Res-->>-Mid: JSON
+    Mid-->>-UI: 200 OK
+    UI-->>User: Affiche l'interface Geofences
+    end
+        </div>
+    </div>
+
+    <div class="notes-box">
+        <strong>Information Technique :</strong>
+        Ces diagrammes UML de séquence sont générés dynamiquement par <a href="https://mermaid.js.org/" target="_blank">Mermaid.js</a> au chargement de la page. Les lignes continues (->>) représentent les appels synchrones (HTTP/Calculs) et les lignes pointillées (-->>) représentent les réponses ou envois asynchrones (WebSocket, Promises). 
+    </div>
+
+    <!-- Script d'initialisation Mermaid.js -->
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'base',
+            themeVariables: {
+                primaryColor: '#ffffff',
+                primaryTextColor: '#1f2937',
+                primaryBorderColor: '#cbd5e1',
+                lineColor: '#475569',
+                secondaryColor: '#f1f5f9',
+                tertiaryColor: '#e2e8f0',
+                noteBkgColor: '#fef3c7',
+                noteTextColor: '#92400e',
+                noteBorderColor: '#f59e0b',
+                actorBkg: '#ffffff',
+                actorBorder: '#64748b',
+                actorTextColor: '#0f172a',
+                actorLineColor: '#94a3b8',
+                signalTextColor: '#334155',
+                sequenceNumberColor: '#ffffff',
+            },
+            sequence: {
+                showSequenceNumbers: true,
+                actorMargin: 50,
+                messageMargin: 40,
+                boxMargin: 10,
+                rightAngles: false
+            }
+        });
+    </script>
+</body>
+</html>

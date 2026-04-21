@@ -17,6 +17,7 @@ interface LoginResult {
 
 interface AuthState {
   user: User | null;
+  token: string | null;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<LoginResult>;
   logout: () => void;

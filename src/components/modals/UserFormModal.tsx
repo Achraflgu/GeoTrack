@@ -104,7 +104,7 @@ const UserFormModal = ({ open, onClose, user }: UserFormModalProps) => {
               type="email"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              placeholder="utilisateur@email.dz"
+              placeholder="utilisateur@email.com"
               required
             />
           </div>

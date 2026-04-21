@@ -33,6 +33,17 @@ const EnterprisesPage = () => {
   const [formModalOpen, setFormModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedEnterprise, setSelectedEnterprise] = useState<Enterprise | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
+
+  const filteredEnterprises = enterprises.filter((ent) => {
+    const matchesSearch = ent.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      ent.address?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      ent.contactEmail?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || ent.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
 
   // Only admin and supervisor can access
   if (user?.role === 'operator') {
@@ -60,14 +71,29 @@ const EnterprisesPage = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'active':
-        return <Badge className="bg-success text-success-foreground">Actif</Badge>;
+        return <Badge className="bg-success text-success-foreground hover:bg-success">Actif</Badge>;
       case 'suspended':
-        return <Badge className="bg-destructive text-destructive-foreground">Suspendu</Badge>;
+        return <Badge className="bg-destructive text-destructive-foreground hover:bg-destructive">Suspendu</Badge>;
       case 'pending':
-        return <Badge className="bg-warning text-warning-foreground">En attente</Badge>;
+        return <Badge className="bg-warning text-warning-foreground hover:bg-warning">En attente</Badge>;
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
+  };
+
+  const exportCSV = () => {
+    const headers = ['Entreprise', 'Email', 'Téléphone', 'Adresse', 'Statut', 'Date Inscription', 'Préfixe IMEI', 'Préfixe Série'];
+    const rows = filteredEnterprises.map(e => [
+      e.name, e.contactEmail, e.phone, e.address, e.status, new Date(e.createdAt).toLocaleDateString('fr-FR'), e.imeiPrefix || '', e.serialPrefix || ''
+    ]);
+    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `enterprises_export_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -175,10 +201,94 @@ const EnterprisesPage = () => {
                       </TableCell>
                     )}
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+                </TableHeader>
+                <TableBody>
+                  {filteredEnterprises.map((enterprise) => {
+                    const entDevices = devices.filter(d => d.enterpriseId === enterprise.id);
+                    const online = entDevices.filter(d => ['online', 'moving', 'idle'].includes(d.status)).length;
+                    const offline = entDevices.length - online;
+
+                    return (
+                      <TableRow
+                        key={enterprise.id}
+                        className="border-border/50 cursor-pointer hover:bg-secondary/50 group"
+                        onClick={() => navigate(`/enterprises/${enterprise.id}`)}
+                      >
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                              <Building2 className="w-5 h-5 text-primary" />
+                            </div>
+                            <div>
+                              <p className="font-semibold">{enterprise.name}</p>
+                              <p className="text-sm text-muted-foreground line-clamp-1">{enterprise.address}</p>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col gap-0.5">
+                            <p className="text-sm">{enterprise.contactEmail}</p>
+                            <p className="text-sm text-muted-foreground">{enterprise.phone}</p>
+                            <div className="flex flex-wrap gap-1 mt-1.5 opacity-80 group-hover:opacity-100 transition-opacity">
+                              <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-border/50 text-muted-foreground bg-secondary/30">IMEI: {enterprise.imeiPrefix || '35907'}</Badge>
+                              <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-border/50 text-muted-foreground bg-secondary/30">SÉRIE: {enterprise.serialPrefix || 'GT'}</Badge>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col gap-1 text-sm bg-secondary/10 px-3 py-2 rounded-lg ring-1 ring-border/50 inline-block w-full max-w-[150px] group-hover:bg-secondary/30 transition-colors shadow-sm">
+                            <div className="flex items-center justify-between gap-4">
+                              <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Total</span>
+                              <span className="font-bold text-xs">{entDevices.length}</span>
+                            </div>
+                            <div className="flex items-center justify-between gap-4">
+                              <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">En ligne</span>
+                              <span className="font-bold text-success text-xs">{online}</span>
+                            </div>
+                            <div className="flex items-center justify-between gap-4">
+                              <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Hors ligne</span>
+                              <span className="font-bold text-destructive text-xs">{offline}</span>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          {getStatusBadge(enterprise.status)}
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground font-medium">
+                          {new Date(enterprise.createdAt).toLocaleDateString('fr-FR')}
+                        </TableCell>
+                        {user?.role === 'admin' && (
+                          <TableCell className="text-right">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="hover:bg-background">
+                                  <MoreHorizontal className="w-4 h-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-48">
+                                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigate(`/enterprises/${enterprise.id}`); }}>
+                                  <Eye className="w-4 h-4 mr-2" />
+                                  Voir les détails
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleEdit(enterprise); }}>
+                                  <Edit className="w-4 h-4 mr-2" />
+                                  Modifier
+                                </DropdownMenuItem>
+                                <DropdownMenuItem className="text-destructive focus:text-destructive focus:bg-destructive/10" onClick={(e) => { e.stopPropagation(); handleDelete(enterprise); }}>
+                                  <Trash2 className="w-4 h-4 mr-2" />
+                                  Supprimer
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        )}
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          )}
         </div>
       </div>
 

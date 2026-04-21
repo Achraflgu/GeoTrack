@@ -21,6 +21,59 @@ const DevicesPage = () => {
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
   const [enterpriseFilter, setEnterpriseFilter] = useState<string>('all');
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Read URL parameters when they change
+  useEffect(() => {
+    const defaultEnterpriseId = searchParams.get('enterpriseId');
+    const defaultStatus = searchParams.get('status');
+    
+    if (defaultEnterpriseId && defaultEnterpriseId !== 'all') {
+      setEnterpriseFilter(defaultEnterpriseId);
+    }
+    if (defaultStatus && defaultStatus !== 'all') {
+      setStatusFilter(defaultStatus as any);
+    }
+  }, [searchParams, setStatusFilter]);
+
+  // Filter devices based on enterprise filter and other filters
+  const getFilteredDevices = () => {
+    let filtered = devices;
+
+    // Filter by user's enterprise if operator
+    if (user?.role === 'operator' && user.enterpriseId) {
+      filtered = filtered.filter(d => d.enterpriseId === user.enterpriseId);
+    }
+
+    // Filter by selected enterprise
+    if (enterpriseFilter !== 'all') {
+      filtered = filtered.filter(d => d.enterpriseId === enterpriseFilter);
+    }
+
+    // Filter by search query (includes IMEI, subscriberNumber)
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(d =>
+        d.name.toLowerCase().includes(query) ||
+        d.imei.toLowerCase().includes(query) ||
+        d.serialNumber.toLowerCase().includes(query) ||
+        (d.subscriberNumber && d.subscriberNumber.toLowerCase().includes(query)) ||
+        d.enterpriseName.toLowerCase().includes(query) ||
+        d.location.address.toLowerCase().includes(query)
+      );
+    }
+
+    // Filter by status
+    if (statusFilter === 'connected' || statusFilter === 'online') {
+      filtered = filtered.filter(d => ['online', 'moving', 'idle'].includes(d.status));
+    } else if (statusFilter !== 'all') {
+      filtered = filtered.filter(d => d.status === statusFilter);
+    }
+
+    return filtered;
+  };
+
+  const filteredDevices = getFilteredDevices();
 
   // Filter devices based on enterprise filter and other filters
   const getFilteredDevices = () => {
@@ -129,6 +182,7 @@ const DevicesPage = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Tous les statuts</SelectItem>
+                <SelectItem value="connected">Tous Connectés</SelectItem>
                 <SelectItem value="online">En ligne</SelectItem>
                 <SelectItem value="moving">En mouvement</SelectItem>
                 <SelectItem value="idle">À l'arrêt</SelectItem>
@@ -185,9 +239,111 @@ const DevicesPage = () => {
                   device={device}
                   isSelected={selectedDevice?.id === device.id}
                   onClick={() => navigate(`/devices/${device.id}`)}
-                  compact={viewMode === 'list'}
                 />
               ))}
+            </div>
+          ) : (
+            <div className="glass-card overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-border/50 hover:bg-transparent">
+                    <TableHead className="text-muted-foreground w-[250px]">Appareil</TableHead>
+                    <TableHead className="text-muted-foreground">Localisation</TableHead>
+                    <TableHead className="text-muted-foreground">Télémétrie</TableHead>
+                    <TableHead className="text-muted-foreground">Statut</TableHead>
+                    <TableHead className="text-muted-foreground text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredDevices.map((device) => {
+                    const DeviceIcon = getDeviceIcon(device.deviceType);
+                    return (
+                      <TableRow
+                        key={device.id}
+                        className="border-border/50 cursor-pointer hover:bg-secondary/50 group"
+                        onClick={() => navigate(`/devices/${device.id}`)}
+                      >
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <div className={cn(
+                              "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform",
+                              device.status === 'alert' ? 'bg-destructive/10' : 'bg-primary/10'
+                            )}>
+                              <DeviceIcon className={cn(
+                                "w-5 h-5",
+                                device.status === 'alert' ? 'text-destructive' : 'text-primary'
+                              )} />
+                            </div>
+                            <div>
+                              <p className="font-semibold line-clamp-1">{device.name}</p>
+                              <div className="flex flex-col gap-0.5 mt-1">
+                                <span className="text-xs text-muted-foreground">IMEI: {device.imei}</span>
+                                {device.subscriberNumber && <span className="text-xs text-muted-foreground">SIM: {device.subscriberNumber}</span>}
+                              </div>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col gap-1 w-full max-w-[280px]">
+                            <div className="flex items-start gap-1.5 text-sm">
+                              <MapPin className="w-3.5 h-3.5 mt-0.5 text-muted-foreground shrink-0" />
+                              <span className="line-clamp-2 text-muted-foreground">{device.location.address}</span>
+                            </div>
+                            <span className="text-[10px] text-muted-foreground/60 pl-5">
+                              Relevé: {formatDate(device.lastUpdate)}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-4 text-xs text-muted-foreground bg-secondary/10 px-3 py-2 rounded-lg ring-1 ring-border/50 inline-flex group-hover:bg-secondary/30 transition-colors shadow-sm">
+                            <div className="flex items-center gap-1.5">
+                              <Gauge className="w-3.5 h-3.5 text-primary" />
+                              <span className="font-medium">{device.speed} <span className="text-[10px]">km/h</span></span>
+                            </div>
+                            <div className="w-px h-3 bg-border" />
+                            <div className="flex items-center gap-1.5">
+                              <Battery className="w-3.5 h-3.5 text-success" />
+                              <span className="font-medium">{device.battery}%</span>
+                            </div>
+                            <div className="w-px h-3 bg-border" />
+                            <div className="flex items-center gap-1.5">
+                              <Signal className="w-3.5 h-3.5 text-info" />
+                              <span className="font-medium">{device.signal}%</span>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge 
+                            variant="secondary" 
+                            className={cn(getStatusColor(device.status), device.status === 'offline' ? 'text-muted-foreground opacity-80' : 'text-white')}
+                          >
+                            {getStatusLabel(device.status)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="hover:bg-background h-8 w-8">
+                                <MoreHorizontal className="w-4 h-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-40">
+                              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigate(`/devices/${device.id}`); }}>
+                                <Eye className="w-4 h-4 mr-2" />
+                                Ouvrir
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); window.open(`https://maps.google.com/?q=${device.location.lat},${device.location.lng}`, '_blank'); }}>
+                                <ExternalLink className="w-4 h-4 mr-2" />
+                                Google Maps
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
             </div>
           )}
         </div>

@@ -29,11 +29,13 @@ interface DeviceFormModalProps {
   open: boolean;
   onClose: () => void;
   device?: Device | null;
+  initialEnterpriseId?: string;
 }
 
 const DeviceFormModal = ({ open, onClose, device }: DeviceFormModalProps) => {
   const { enterprises, fetchDevices } = useAppStore();
   const isEditing = !!device;
+  const isOperator = user?.role === 'operator';
 
   const [formData, setFormData] = useState({
     name: '',
@@ -121,7 +123,7 @@ const DeviceFormModal = ({ open, onClose, device }: DeviceFormModalProps) => {
     e.preventDefault();
 
     const enterprise = enterprises.find(e => e.id === formData.enterpriseId);
-    if (!enterprise) {
+    if (!enterprise && (!isEditing || !isOperator)) {
       toast.error('Veuillez sélectionner une entreprise');
       return;
     }
@@ -263,6 +265,9 @@ const DeviceFormModal = ({ open, onClose, device }: DeviceFormModalProps) => {
           <DialogTitle>
             {isEditing ? 'Modifier l\'appareil' : 'Ajouter un appareil'}
           </DialogTitle>
+          <DialogDescription className="hidden">
+            Remplir les détails de l'appareil
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">

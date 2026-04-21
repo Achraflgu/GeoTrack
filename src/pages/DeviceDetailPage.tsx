@@ -459,10 +459,12 @@ export default function DeviceDetailPage() {
                   <Edit className="w-4 h-4 mr-2" />
                   Modifier
                 </Button>
-                <Button variant="destructive" onClick={() => setDeleteModalOpen(true)}>
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Supprimer
-                </Button>
+                {user?.role === 'admin' && (
+                  <Button variant="destructive" onClick={() => setDeleteModalOpen(true)}>
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Supprimer
+                  </Button>
+                )}
               </div>
             )}
           </div>

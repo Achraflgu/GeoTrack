@@ -18,7 +18,7 @@ import {
   Filter,
   Building2
 } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow, format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { useState, useEffect } from 'react';
@@ -248,7 +248,7 @@ const AlertsPage = () => {
                   <Card 
                     key={`${alert.id}-${idx}`}
                     className={cn(
-                      "glass-card border transition-all cursor-pointer hover:shadow-md",
+                      "glass-card group border transition-all cursor-pointer hover:shadow-md",
                       getSeverityColor(alert.severity),
                       !alert.read && "ring-2 ring-primary/20"
                     )}
@@ -278,12 +278,26 @@ const AlertsPage = () => {
                           </div>
                           
                           <div className="flex items-center justify-between mt-3">
-                            <p className="text-xs text-muted-foreground">
-                              {formatDistanceToNow(new Date(alert.timestamp), { 
-                                addSuffix: true, 
-                                locale: fr 
-                              })}
-                            </p>
+                            <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground mt-1">
+                              {/* Relative Time Badge */}
+                              <div className="font-medium bg-background/40 px-2 py-0.5 rounded text-[11px] border border-border/30">
+                                {formatDistanceToNow(new Date(alert.timestamp), { 
+                                  addSuffix: true, 
+                                  locale: fr 
+                                })}
+                              </div>
+                              
+                              <span className="opacity-30">•</span>
+
+                              {/* Exact Precision Date & Time */}
+                              <div className="flex items-center gap-1.5 text-[11px] font-medium bg-background/60 px-2.5 py-1 rounded-md border border-border/50 shadow-sm w-fit group-hover:border-primary/30 transition-colors">
+                                <Calendar className="w-3 h-3 opacity-70" />
+                                <span>{format(new Date(alert.timestamp), "d MMM yyyy", { locale: fr })}</span>
+                                <span className="opacity-40 mx-0.5">|</span>
+                                <Clock className="w-3 h-3 opacity-70 text-primary" />
+                                <span className="font-mono font-semibold tracking-tight">{format(new Date(alert.timestamp), "HH:mm:ss")}</span>
+                              </div>
+                            </div>
                             <div className="flex items-center gap-2">
                               {!alert.read && (
                                 <Button 
